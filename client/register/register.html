@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/public/iconfont/iconfont.css">
+    <link rel="icon" href="/public/img/favicon.ico">
+    <title>register</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-image: url('/public/img/bg.jpg');
+        }
+
+        /*表单样式*/
+        .form {
+            display: flex;
+            justify-content: space-between;
+            width: 600px;
+            height: 470px;
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            margin-top: -150px;
+            margin-left: -300px;
+            opacity: 0.6;
+            background-color: #ccc;
+            border-radius: 5px;
+        }
+
+        .image {
+            width: 200px;
+            height: 200px;
+            margin-top: 100px;
+            margin-left: 20px;
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        .headimg {
+            position: absolute;
+            bottom: 50px;
+            left: 90px;
+        }
+
+        #avater {
+            width: 56px;
+            height: 20px;
+            overflow: hidden;
+            position: absolute;
+            top: 348px;
+            left: 89px;
+        }
+
+        #avater input {
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        form {
+            width: 200px;
+            height: 200px;
+            margin-top: 50px;
+        }
+
+        #error {
+            position: absolute;
+            top: 10px;
+            left: 63%;
+            color: red;
+        }
+
+        .iconfont {
+            position: absolute;
+            top: 12px;
+            left: 10px;
+            width: 30px;
+            height: 30px;
+            font-size: 25px;
+        }
+
+        .password .iconfont {
+            top: 13px;
+            left: 13px;
+            font-size: 20px;
+        }
+
+        .verificationCode .iconfont {
+            top: 13px;
+            left: 13px;
+            font-size: 21px;
+        }
+
+        .username,
+        .password,
+        .verificationCode {
+            position: relative;
+            left: -50%;
+            width: 250px;
+            height: 50px;
+            margin-top: 20px;
+            background: #E8F0FE;
+            border-radius: 50px;
+        }
+
+        #username,
+        #nickname,
+        #password,
+        #verifyPassword,
+        #verificationCode {
+            position: absolute;
+            top: 8px;
+            left: 48px;
+            width: 80%;
+            height: 70%;
+            padding-left: 2px;
+            border-radius: 20px;
+            outline: none;
+            border: none;
+            background-color: #E8F0FE;
+        }
+
+        .verificationCode {
+            width: 150px;
+        }
+
+        #verificationCode {
+            top: 14px;
+            width: 60%;
+            height: 40%;
+        }
+
+        .verificationCodeImg {
+            position: absolute;
+            display: flex;
+            justify-content: space-between;
+            left: 103%;
+            width: 60%;
+            height: 100%;
+        }
+
+        .verificationCodeImg .svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .verificationCodeImg .svg svg{
+            width: 100%;
+            height: 100%;
+        }
+
+        .submit {
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            margin-left: -50%;
+            width: 250px;
+            height: 50px;
+            border: none;
+            outline: none;
+            background: #E8F0FE;
+            border-radius: 50px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="large-header" class="">
+        <canvas id="demo-canvas" width="1590" height="711"></canvas>
+    </div>
+    <div class="form">
+        <div class="image">
+            <img src="/public/img/account.jpg" alt="" id="headimgid">
+            <button class="headimg">上传头像</button>
+            <form id="avater" action="/upload" method="post" enctype="multipart/form-data">
+                <input type="file" name="avatar" id="headimage" />
+            </form>
+        </div>
+        <div class="formlist">
+            <form action="/register" method="POST" id="formlist" onsubmit="">
+                <div id="error"></div>
+                <!-- 自动生成十位数账号 -->
+                <div class="username">
+                    <i class="iconfont icon-zhanghu1"></i>
+                    <input type="text" id="username" name="userid" placeholder="账号" readonly>
+                </div>
+                <div class="username">
+                    <i class="iconfont icon-zhanghu1"></i>
+                    <input type="text" id="nickname" name="username" placeholder="请输入昵称" autocomplete="off">
+                </div>
+                <div class="password">
+                    <i class="iconfont icon-mima"></i>
+                    <input type="password" id="password" name="password" placeholder="密码" autocomplete="off">
+                </div>
+                <!-- 确认密码 -->
+                <div class="password">
+                    <i class="iconfont icon-mima"></i>
+                    <input type="password" id="verifyPassword" placeholder="确认密码" autocomplete="off">
+                </div>
+                <!-- 验证码 -->
+                <div class="verificationCode">
+                    <i class="iconfont icon-yanzhengma"></i>
+                    <input type="text" id="verificationCode" placeholder="请输入验证码" autocomplete="off">
+                    <div class="verificationCodeImg">
+                        <div class="svg"></div>
+                    </div>
+                </div>
+                <button type="button" id="submit" class="submit">注册</button>
+            </form>
+        </div>
+
+    </div>
+</body>
+<script src="/node_modules/jquery/dist/jquery.min.js"></script>
+<script src="/public/js/register.js"></script>
+<script src="/public/js/TweenLite/TweenLite.min.js"></script>
+<script src="/public/js/TweenLite/EasePack.min.js"></script>
+<script src="/public/js/demo.js"></script>
+
+</html>

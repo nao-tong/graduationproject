@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/public/iconfont/iconfont.css">
+    <link rel="icon" href="/public/img/favicon.ico">
+    <title>量子研究所</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-image: url('/public/img/timg (2).jpg');
+            background-position-x: -150px;
+        }
+
+        /*背景样式*/
+        .sonwbox {
+            width: 100%;
+            height: 100%;
+        }
+
+        /*表单样式*/
+        .form {
+            display: flex;
+            justify-content: space-between;
+            width: 600px;
+            height: 380px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-top: -150px;
+            margin-left: -300px;
+            opacity: 0.6;
+            background-color: #ccc;
+            border-radius: 5px;
+        }
+
+        .image {
+            width: 200px;
+            height: 200px;
+            margin-top: 80px;
+            margin-left: 20px;
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        form {
+            width: 200px;
+            height: 200px;
+            margin-top: 50px;
+        }
+
+        #error {
+            position: absolute;
+            top: 10px;
+            left: 60%;
+            color: red;
+        }
+
+        .iconfont {
+            position: absolute;
+            top: 12px;
+            left: 10px;
+            width: 30px;
+            height: 30px;
+            font-size: 25px;
+        }
+
+        .username,
+        .password,
+        .verificationCode {
+            position: relative;
+            left: -50%;
+            width: 250px;
+            height: 50px;
+            margin-top: 20px;
+            background: #E8F0FE;
+            border-radius: 50px;
+        }
+
+        #username,
+        #password,
+        #verificationCode {
+            position: absolute;
+            top: 8px;
+            left: 48px;
+            width: 80%;
+            height: 70%;
+            padding-left: 2px;
+            border-radius: 20px;
+            outline: none;
+            border: none;
+            background-color: #E8F0FE;
+        }
+
+        .verificationCode {
+            width: 150px;
+        }
+
+        #verificationCode {
+            top: 14px;
+            width: 60%;
+            height: 40%;
+        }
+
+        .verificationCodeImg {
+            position: absolute;
+            display: flex;
+            justify-content: space-between;
+            left: 103%;
+            width: 60%;
+            height: 100%;
+        }
+
+        .verificationCodeImg .svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .verificationCodeImg .svg svg{
+            width: 100%;
+            height: 100%;
+        }
+
+        .password .iconfont {
+            top: 13px;
+            left: 13px;
+            font-size: 20px;
+        }
+
+        .verificationCode .iconfont {
+            top: 13px;
+            left: 13px;
+            font-size: 21px;
+        }
+
+        .submit {
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            margin-left: -50%;
+            width: 250px;
+            height: 50px;
+            border: none;
+            outline: none;
+            background: #E8F0FE;
+            border-radius: 50px;
+        }
+
+        .register {
+            margin-left: 50px;
+            margin-top: 30px;
+            font-size: 12px;
+        }
+
+        .register a {
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 背景 雪花效果 -->
+    <div class="snowbox"></div>
+    <!-- 表单 -->
+    <div class="form">
+        <div class="image">
+            <img src="/public/img/account.jpg" alt="" id="headimg">
+        </div>
+        <div class="formlist">
+            <form action="/login" method="POST">
+                <div id="error"></div>
+                <div class="username">
+                    <i class="iconfont icon-zhanghu1"></i>
+                    <input type="text" id="username" name="userid" placeholder="账号" autocomplete="off">
+                </div>
+                <div class="password">
+                    <i class="iconfont icon-mima"></i>
+                    <input type="password" id="password" name="password" placeholder="密码" autocomplete="off">
+                </div>
+                <!-- 验证码 -->
+                <div class="verificationCode">
+                    <i class="iconfont icon-yanzhengma"></i>
+                    <input type="text" id="verificationCode" placeholder="请输入验证码" autocomplete="off">
+                    <div class="verificationCodeImg">
+                        <div class="svg"></div>
+                    </div>
+                </div>
+                <button type="submit" class="submit">登录</button>
+                <div class="register">
+                    <a href="/user/register">还没有账号？立即注册</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- js文件引入 -->
+    <script src="/public/js/snowflake.js"></script>
+    <script src="/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="/public/js/login.js"></script>
+</body>
+
+</html>
