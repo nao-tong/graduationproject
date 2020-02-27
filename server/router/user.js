@@ -14,6 +14,7 @@ const JwtUtil = require('../encapsulation/jwt')
 const usertable = require('../db/usertable')
 const tablelink = require('../db/tablelink')
 const filelink = require('../db/filelink')
+const filemsg = require('../db/filemsg')
 
 
 var user = express.Router();
@@ -283,7 +284,7 @@ user.post('/alteruser', function (req, res) {
             res.send(account)
         })
     } catch (error) {
-        fs.unlink(user.headimg, function (err) {
+        fs.unlink('./' + user.headimg, function (err) {
             if (err) {
                 console.log(err);
                 return false;
@@ -303,22 +304,213 @@ user.post('/alteruser', function (req, res) {
 
 //文件上传
 user.post('/uploadfile', upload.single('avatar'), function (req, res) {
-    let result = {};
+    let fileobj = {}
+    let result = {}
     fileindex++;
-    let userid = aes.Decrypt(req.headers.userid)
-    filepath = (req.file.destination + '/' + req.file.filename).replace('.', '');
-    file.push(filepath);
+
+    fileobj.userid = aes.Decrypt(req.headers.userid)
+    fileobj.update = new Date().getTime()
+    fileobj.filesize = req.file.size
+    fileobj.fileid = aes.Encrypt(Number(Math.random().toString().substr(3) + Date.now()).toString(36))
+    fileobj.filename = req.file.filename
+    fileobj.filetype = req.file.mimetype.split('/')[0]
+    fileobj.filepath = (req.file.destination + '/' + req.file.filename).replace('.', '');
+
+    console.log(fileobj)
+    file.push(fileobj.filepath);
     result.fileindex = fileindex;
     result.upload = false;
     if (req.file) {
-        result.upload = true;
-        result.file = filepath;
-        res.send(result);
+        //文件关联数据库
+        try{
+            //添加字段(判断字段是否为空，为空直接添加数据，不为空则先添加字段，再添加数据？？？)
+            //查询空字段
+            filelink.descTable('file', function (data) {
+                let objlength = Object.keys(data).length
+                let arr = []
+                for (let i = 0; i < objlength; i++) {
+                    if (data[i].Field == 'userid') {
+                        continue
+                    } else {
+                        arr.push(data[i].Field)
+                    }
+                }
+                if(arr.length){
+                    new Promise(function(resolve,reject){
+                        filelink.findOne(fileobj.userid, function (data) {
+                            if(data){
+                                let field = {}
+                                for (let i = 0; i < arr.length; i++) {
+                                    if (!data[arr[i]]) {
+                                        //查询到空字段
+                                        console.log('true')
+                                        field.empty = arr[i]
+                                        fileobj.field = arr[i]
+                                        resolve(field)
+                                        break
+                                    }else{
+                                        if(i == arr.length - 1){
+                                            //没有空字段,需要增加字段
+                                            field.empty = false
+                                            resolve(field)
+                                        }
+                                    }
+                                }
+                            }else{
+                                reject()
+                            }
+                            
+                        })
+                    })
+                    .then(function(data){
+                        if(data.empty){
+                            //有空字段
+                            filelink.upDate(fileobj,function(){
+                                //字段添加成功后添加文件信息
+                                filemsg.addflie(fileobj,function(data){
+                                    result.upload = true;
+                                    result.file = fileobj.filepath;
+                                    res.send(result);
+                                })
+                            })
+                        }else{
+                            //无空字段
+                            new Promise(function(resolve,reject){
+                                filelink.descTable('file',function(data){
+                                    //console.log(data[data.length - 1].Field.indexOf('file'))
+                                    
+                                    if(data){
+                                        if(!data[data.length - 1].Field.indexOf('file')){
+                                            let field = 'file'+ (Number(data[data.length - 1].Field.split('e')[1]) + 1)
+                                            filelink.addField('file',field,function(data){
+                                                fileobj.field = field
+                                                resolve(fileobj)
+                                            })
+                                        }else{
+                                            filelink.addField('file','file1',function(data){
+                                                fileobj.field= 'file1'
+                                                resolve(fileobj)
+                                            })
+                                        }
+                                    }else{
+                                        reject(data)
+                                    }
+                                    //console.log(data[data.length - 1].Field)
+                                })
+                            })
+                            .then(function(data){
+                                filelink.upDate(data,function(){
+                                    //字段添加成功后添加文件信息
+                                    filemsg.addflie(fileobj,function(data){
+                                        result.upload = true;
+                                        result.file = fileobj.filepath;
+                                        res.send(result);
+                                    })
+                                })
+                            },function(){
+                                res.send(result)
+                            })  
+                        }
+                    },function(){
+                        //查询失败
+                    })
+                }else{
+                    //没有字段，需添加字段
+                    new Promise(function(resolve,reject){
+                        filelink.descTable('file',function(data){
+                            //console.log(data[data.length - 1].Field.indexOf('file'))
+                            
+                            if(data){
+                                if(!data[data.length - 1].Field.indexOf('file')){
+                                    let field = 'file'+ (Number(data[data.length - 1].Field.split('e')[1]) + 1)
+                                    filelink.addField('file',field,function(data){
+                                        fileobj.field = field
+                                        resolve(fileobj)
+                                    })
+                                }else{
+                                    filelink.addField('file','file1',function(data){
+                                        fileobj.field= 'file1'
+                                        resolve(fileobj)
+                                    })
+                                }
+                            }else{
+                                reject(data)
+                            }
+                            //console.log(data[data.length - 1].Field)
+                        })
+                    })
+                    .then(function(data){
+                        filelink.upDate(data,function(){
+                            //字段添加成功后添加文件信息
+                            filemsg.addflie(fileobj,function(data){
+                                result.upload = true;
+                                result.file = fileobj.filepath;
+                                res.send(result);
+                            })
+                        })
+                    },function(){
+                        res.send(result)
+                    })  
+                }
+            })
+
+            // new Promise(function(resolve,reject){
+            //     filelink.descTable('file',function(data){
+            //         //console.log(data[data.length - 1].Field.indexOf('file'))
+                    
+            //         if(data){
+            //             if(!data[data.length - 1].Field.indexOf('file')){
+            //                 let field = 'file'+ (Number(data[data.length - 1].Field.split('e')[1]) + 1)
+            //                 filelink.addField('file',field,function(data){
+            //                     fileobj.field = field
+            //                     resolve(fileobj)
+            //                 })
+            //             }else{
+            //                 filelink.addField('file','file1',function(data){
+            //                     fileobj.field= 'file1'
+            //                     resolve(fileobj)
+            //                 })
+            //             }
+            //         }else{
+            //             reject(data)
+            //         }
+            //         //console.log(data[data.length - 1].Field)
+            //     })
+            // })
+            // .then(function(data){
+            //     filelink.upDate(data,function(){
+            //         //字段添加成功后添加文件信息
+            //         filemsg.addflie(fileobj,function(data){
+            //             result.upload = true;
+            //             result.file = fileobj.filepath;
+            //             res.send(result);
+            //         })
+            //     })
+            // },function(){
+            //     res.send(result)
+            // })  
+        }catch(error){
+            fs.unlink('./' + fileobj.filepath, function (err) {
+                if (err) {
+                    console.log(err);
+                    return false;
+                }
+                console.log('删除文件成功');
+            });
+            fs.writeFile('../log.txt', '"' + error + '"', function (err) {
+                if (err) {
+                    console.log('写入失败')
+                } else {
+                    console.log('写入成功了')
+                }
+            })
+            res.send(result)
+        }
+        
     } else {
         res.send(result)
     }
 })
-
 //删除文件
 user.post('/deletefile', function (req, res) {
     let filepath = req.body.filepath;

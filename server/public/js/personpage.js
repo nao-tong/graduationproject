@@ -130,6 +130,8 @@ $(function () {
      */
     $('#uploadfile').change(function () {
         let fileform = new FormData(document.getElementById('avater'))
+        let file = document.getElementById('uploadfile').files[0]
+        console.log(file)
         $.ajax({
             url: '/uploadfile',
             data: fileform,
