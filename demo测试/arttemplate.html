@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="content"></div>
+    <script id="test" type="text/html">
+        <h1>{{title}}</h1>
+        <ul>
+            {{each list as value i}}
+                <li>索引 {{i + 1}} ：{{value}}</li>
+            {{/each}}
+        </ul>
+    </script>
+    <script src="template.js"></script>
+    <script src="arttemplate.js"></script>
+    
+</body>
+</html>

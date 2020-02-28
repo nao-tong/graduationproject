@@ -142,52 +142,6 @@ function addFile(fileobj, callback) {
 
 
 
-descTable('file', function (data) {
-    let objlength = Object.keys(data).length
-    let arr = []
-    let obj = {};
-    for (let i = 0; i < objlength; i++) {
-        if (data[i].Field == 'userid') {
-            continue
-        } else {
-            arr.push(data[i].Field)
-        }
-    }
-    if(arr){
-        new Promise(function(resolve,reject){
-            findOne('0', function (data) {
-                if(data){
-                    let field = {}
-                    for (let i = 0; i < arr.length; i++) {
-                        if (!data[arr[i]]) {
-                            //查询到空字段
-                            field.empty = arr[i]
-                            resolve(field)
-                            break
-                        }else{
-                            if(i == arr.length - 1){
-                                //需要增加字段
-                                field.empty = false
-                                resolve(field)
-                            }
-                        }
-                    }
-                }else{
-                    reject()
-                }
-                
-            })
-        })
-        .then(function(data){
-            obj.firstnull = data
-        },function(){
-            //查询失败
-        })
-    }else{
-        //没有字段，需添加字段
-    }
-})
-
 exports.findAll = findAll
 exports.findOne = findOne
 exports.addField = addField

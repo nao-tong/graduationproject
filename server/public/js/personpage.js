@@ -164,9 +164,27 @@ $(function () {
         success: function (res) {
 
             //个人信息
-            console.log(res)
             $('#headimg').attr('src', res.headimg)
             $('.username').text(res.username)
+        }
+    })
+
+    $.ajax({
+        url: "/findfile",
+        dataType: "json",
+        type: "post",
+        data: { userid: cookieobj.login },
+        beforeSend: function (request) {
+            //将cookie中的token信息放于请求头中
+            request.setRequestHeader("token", cookieobj.user);
+        },
+        success: function (res) {
+            //文件信息
+            var data = {
+                list: res
+            }
+            var html = template('test', data)
+            document.getElementById('filelist').innerHTML = html
         }
     })
 })

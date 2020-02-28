@@ -164,14 +164,32 @@
 
         .content .file .bottom ul {
             width: 100%;
-            margin-top: 10px;
         }
 
-        .content .file .bottom ul li.top {
+        .content .file .bottom div.top {
             width: 100%;
             color: #CACED0;
             font-size: 13px;
+            margin-top: 10px;
             border: none;
+        }
+
+        .content .file .bottom div.top:hover {
+            background-color: #F4FBFF;
+            border: none;
+        }
+
+        .content .file .bottom div.top span{
+            display: inline-block;
+            padding-left: 20px;
+        }
+
+        .content .file .bottom div.top span.s1 {
+            width: 60%;
+        }
+
+        .content .file .bottom div.top span.s2 {
+            width: 15%;
         }
 
         .content .file .bottom ul li input {
@@ -231,11 +249,6 @@
             background-color: #F4FBFF;
             border-bottom: 0.5px solid #DAEBFE;
             border-top: 0.5px solid #DAEBFE;
-        }
-
-        .content .file .bottom ul li.top:hover {
-            background-color: #F4FBFF;
-            border: none;
         }
 
         .content .form {
@@ -332,7 +345,7 @@
 
 <body>
     <div class="nav">
-        <marquee behavior="scroll" direction="left" style="width:80%;">富强,民主,文明,和谐,自由,平等,公正,法治</marquee>
+        <marquee behavior="scroll" direction="left" style="width:85%;">富强,民主,文明,和谐,自由,平等,公正,法治</marquee>
         <img src="" alt="headimg" id="headimg">
         <!-- <span class="username"></span> -->
         <span class="updata">用户管理</span>
@@ -385,13 +398,13 @@
             <div class="bottom">
                 <!-- 1、文件显示
                 -->
-                <ul>
-                    <li class="top">
-                        <span class="s s1">文件名</span>
-                        <span class="s s2">文件大小</span>
-                        <span class="s s3">修改日期</span>
-                    </li>
-                    <li>
+                <div class="top">
+                    <span class="s s1">文件名</span>
+                    <span class="s s2">文件大小</span>
+                    <span class="s s3">修改日期</span>
+                </div>
+                <ul id="filelist">
+                    <!-- <li>
                         <span class="s s1 filename ">
                             <input name="Fruit" type="checkbox" value="" />
                             <i class="iconfont icon-video- fileicon"></i>
@@ -445,7 +458,7 @@
                         </span>
                         <span class="s s2 filesize">1234</span>
                         <span class="s s3 date">2019-2-29 17:00</span>
-                    </li>
+                    </li> -->
                 </ul>
 
 
@@ -603,8 +616,29 @@
             </script>
         </div>
     </div>
-
+    <script id="test" type="text/html">
+        {{each list as value i}}
+            <li>
+                <span class="s s1 filename ">
+                    <input name="Fruit" type="checkbox" value="" />
+                    {{ if value.filetype == 'image'}}
+                    <i class="iconfont icon-tupian fileicon"></i>
+                    {{ else if  value.filetype == 'video'}}
+                    <i class="iconfont icon-video- fileicon"></i>
+                    {{ else }}
+                    <i class="iconfont icon-icon fileicon"></i>
+                    {{ /if }}
+                    <span class="name">{{ value.filename }}</span>
+                    <a href="{{ value.filepath }}" class="download" download="{{ value.fullname }}"><i class="iconfont icon-xiazai"></i></a>
+                    <i class="iconfont icon-shanchu"></i>
+                </span>
+                <span class="s s2 filesize">{{ value.filesize }}</span>
+                <span class="s s3 date">{{ value.updt }}</span>
+            </li>
+        {{/each}}
+    </script>
     <!-- 引入js文件 -->
+    <script src="/node_modules/arttemplate-gg/dist/template.js"></script>
     <script src="/node_modules/jquery/dist/jquery.min.js"></script>
     <script src="/public/js/personpage.js"></script>
 </body>

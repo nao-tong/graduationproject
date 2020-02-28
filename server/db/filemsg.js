@@ -16,6 +16,17 @@ var connectdb = function () {
     });
 }
 
+//查询一个
+function findOne(fileid, callback) {
+    connectdb();
+    connection.connect();
+    connection.query('SELECT * FROM filemsg WHERE fileid = ' + '"' + fileid + '"', function (error, results, fields) {
+        if (error) throw error;
+        callback(JSON.parse(JSON.stringify(results))[0]);
+    });
+    connection.end();
+}
+
 //添加文件
 function addfile(fileobj, callback) {
     connectdb();
@@ -29,3 +40,4 @@ function addfile(fileobj, callback) {
 
 
 exports.addflie = addfile
+exports.findOne = findOne
