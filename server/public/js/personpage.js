@@ -42,6 +42,47 @@ if (!cookieobj.login) {
 }
 
 $(function () {
+
+    function getfile(){
+        $.ajax({
+            url: "/findfile",
+            dataType: "json",
+            type: "post",
+            data: { userid: cookieobj.login },
+            beforeSend: function (request) {
+                //将cookie中的token信息放于请求头中
+                request.setRequestHeader("token", cookieobj.user);
+            },
+            success: function (res) {
+                console.log(res)
+                //文件信息
+                var data = {
+                    list: res
+                }
+                var html = template('test', data)
+                document.getElementById('filelist').innerHTML = html
+            }
+        })
+    }
+
+    $.ajax({
+        url: "/datauser",
+        dataType: "json",
+        type: "post",
+        data: { userid: cookieobj.login },
+        beforeSend: function (request) {
+            //将cookie中的token信息放于请求头中
+            request.setRequestHeader("token", cookieobj.user);
+        },
+        success: function (res) {
+
+            //个人信息
+            $('#headimg').attr('src', res.headimg)
+            $('.username').text(res.username)
+        }
+    })
+    getfile()
+
     //头像下拉信息
     $('#headimg').mouseenter(function(){
         $('#information').css('display','block')
@@ -106,15 +147,20 @@ $(function () {
      * 文件删除
      * ？？？文件路径(文件id)
      */
-    $('.delete').click(function () {
-        let filepath = './upload/images/avatar-15818234346801d4fda0283a18075.jpg'
+    $('#filelist').on('click','.icon-shanchu',function (e) {
+        let filepath = $(e.target).siblings('a').attr('href')
+        let fileid = $(e.target).next().text()
         $.ajax({
             url: '/deletefile',
-            data: {filepath},
+            data: {
+                filepath,
+                fileid
+            },
             type: 'post',
             beforeSend: function (request) {
                 //将cookie中的token信息放于请求头中
-                request.setRequestHeader("token", cookieobj.user);
+                request.setRequestHeader("token", cookieobj.user)
+                request.setRequestHeader('userid',cookieobj.login)
             },
             success: function (data) {
                 //刷新页面
@@ -147,44 +193,9 @@ $(function () {
             processData: false,
             success: function (data) {
                 //刷新页面
-                console.log(data)
+                getfile()
             }
         })
     })
-
-    $.ajax({
-        url: "/datauser",
-        dataType: "json",
-        type: "post",
-        data: { userid: cookieobj.login },
-        beforeSend: function (request) {
-            //将cookie中的token信息放于请求头中
-            request.setRequestHeader("token", cookieobj.user);
-        },
-        success: function (res) {
-
-            //个人信息
-            $('#headimg').attr('src', res.headimg)
-            $('.username').text(res.username)
-        }
-    })
-
-    $.ajax({
-        url: "/findfile",
-        dataType: "json",
-        type: "post",
-        data: { userid: cookieobj.login },
-        beforeSend: function (request) {
-            //将cookie中的token信息放于请求头中
-            request.setRequestHeader("token", cookieobj.user);
-        },
-        success: function (res) {
-            //文件信息
-            var data = {
-                list: res
-            }
-            var html = template('test', data)
-            document.getElementById('filelist').innerHTML = html
-        }
-    })
+    
 })

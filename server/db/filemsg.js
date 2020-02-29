@@ -38,6 +38,18 @@ function addfile(fileobj, callback) {
     connection.end();
 }
 
+//删除数据(只需要id)
+function deleteData(fileid, callback) {
+    connectdb();
+    connection.connect();
+    connection.query('DELETE FROM filemsg WHERE fileid = ' + '"' + fileid + '"', function (error, result, fields) {
+        if (error) throw error;
+        callback(result.affectedRows)
+    });
+    connection.end();
+}
+
 
 exports.addflie = addfile
 exports.findOne = findOne
+exports.deleteData = deleteData

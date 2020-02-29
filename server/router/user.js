@@ -27,16 +27,12 @@ user.use(bodyParser.json())
 //multer配置
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        let userid;
+        let userid = '';
         let filetype;
         let upl = String(file.mimetype).split('/')[0];
-        if (!req.headers.userid || req.body.userid) {
-            userid = ''
-        }
-        if (req.headers.userid != 'undefined') {
+        if (req.headers.userid != undefined) {
             userid = aes.Decrypt(req.headers.userid)
         }
-
         if (upl == 'image') {
             filetype = 'images'
         } else if (upl == 'video') {
@@ -331,12 +327,11 @@ user.post('/uploadfile', upload.single('avatar'), function (req, res) {
     fileobj.userid = aes.Decrypt(req.headers.userid)
     fileobj.update = req.file.filename.split('-')[1]
     fileobj.filesize = req.file.size
-    fileobj.fileid = aes.Encrypt(Number(Math.random().toString().substr(3) + Date.now()).toString(36))
+    fileobj.fileid = Number(Math.random().toString().substr(3) + Date.now()).toString(36)
     fileobj.filename = req.file.filename
     fileobj.filetype = req.file.mimetype.split('/')[0]
     fileobj.filepath = (req.file.destination + '/' + req.file.filename).replace('.', '')
 
-    console.log(fileobj)
     file.push(fileobj.filepath);
     result.fileindex = fileindex;
     result.upload = false;
@@ -535,62 +530,79 @@ user.post('/uploadfile', upload.single('avatar'), function (req, res) {
 //删除文件
 user.post('/deletefile', function (req, res) {
     let filepath = req.body.filepath;
-    console.log(filepath)
-    fs.unlink(filepath, function (err) {
-        if (err) {
-            console.log(err);
-            return false;
-        }
-        console.log('删除文件成功');
-    });
+    let userid = aes.Decrypt(req.headers.userid)
+    let fileid = req.body.fileid
+
+    /**
+     * 先删除filemsg，再删除fileid，再删除文件
+     */
+    
+    // fs.unlink('./' + filepath, function (err) {
+    //     if (err) {
+    //         console.log(err);
+    //         return false;
+    //     }
+    //     console.log('删除文件成功');
+    // });
+
 })
 
 //检索用户所拥有的所有文件（分类）
 user.post('/findfile', function (req, res) {
-
     let userid = aes.Decrypt(req.body.userid)
+    let array = []
     try {
         filelink.findOne(userid, function (data) {
-            let arr = []
             let filemessage = []
-            for (let item in data) {
-                if (item == 'userid') {
-                    continue
-                } else {
-                    arr.push(data[item])
-                }
-            }
-            for (let i = 0; i < arr.length; i++) {
-                filemsg.findOne(arr[i], function (data) {
-                    if(data){
-                        let dt = data
-                        let date = new Date(Number(dt.updt))
-                        let hour = date.getHours() > 9 ? date.getHours() : '0' + date.getHours()
-                        let minute = date.getMinutes() >9?date.getMinutes():'0'+date.getMinutes()
-                        dt.updt = date.getFullYear() + '-' + date.getMonth() + 1 + '-' + date.getDate() + ' ' + hour + ':' + minute
-                        dt.fullname = dt.filename.split('-')[2]
-                        dt.filename = dt.filename.split('-')[2].split('.')[0]
-                        if (dt.filesize / 1024 < 1 || dt.filesize / 1024 / 1024 < 1) {
-                            dt.filesize = (dt.filesize / 1024).toFixed(2) + ' K'
-                        } else if (dt.filesize / 1024 / 1024 > 1 || dt.filesize / 1024 / 1024 / 1024 < 1) {
-                            dt.filesize = (dt.filesize / 1024 / 1024).toFixed(2) + ' M'
-                        } else {
-                            dt.filesize = (dt.filesize / 1024 / 1024 / 1024).toFixed(2) + ' G'
-                        }
-    
-                        filemessage.push(dt)
-                        if (i == arr.length - 1) {
-                            res.send(filemessage)
-                        }
-                    }else{
-                        if (i == arr.length - 1) {
-                            res.send(filemessage)
+            new Promise(function (resolve) {
+                let arr = []
+                let num = 0
+                for (let item in data) {
+                    num++
+                    if (item == 'userid') {
+                        continue
+                    } else {
+                        arr.push(data[item])
+                        if (num == Object.keys(data).length) {
+                            resolve(arr)
                         }
                     }
-                    
+                }
+            })
+                .then(function (arr) {
+                    let j = 0
+                    for (let i = 0; i < arr.length; i++) {
+                        filemsg.findOne(arr[i], function (data) {
+                            j++
+                            if (!data) {
+                                if (j == arr.length) {
+                                    res.send(filemessage)
+                                }
+                            } else {
+                                let dt = data
+                                let date = new Date(Number(dt.updt))
+                                let hour = date.getHours() > 9 ? date.getHours() : '0' + date.getHours()
+                                let minute = date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()
+                                dt.updt = date.getFullYear() + '-' + date.getMonth() + 1 + '-' + date.getDate() + ' ' + hour + ':' + minute
+                                dt.fullname = dt.filename.split('-')[2]
+                                dt.filename = dt.filename.split('-')[2].split('.')[0]
+                                if (dt.filesize / 1024 < 1 || dt.filesize / 1024 / 1024 < 1) {
+                                    dt.filesize = (dt.filesize / 1024).toFixed(2) + ' K'
+                                } else if (dt.filesize / 1024 / 1024 > 1 || dt.filesize / 1024 / 1024 / 1024 < 1) {
+                                    dt.filesize = (dt.filesize / 1024 / 1024).toFixed(2) + ' M'
+                                } else {
+                                    dt.filesize = (dt.filesize / 1024 / 1024 / 1024).toFixed(2) + ' G'
+                                }
+
+                                filemessage.push(dt)
+                                if (j == arr.length) {
+                                    res.send(filemessage)
+                                }
+                            }
+
+                        })
+                    }
                 })
-            }
-            
         })
     } catch (eror) {
         fs.writeFile('../log.txt', '"' + error + '"', function (err) {

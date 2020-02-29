@@ -140,6 +140,12 @@ function addFile(fileobj, callback) {
 //删除字段demo
 // deleteField('file','file1',function(){})
 
+//删除某一文件id
+
+findOne('0',function(data){
+    console.log(data)
+})
+
 
 
 exports.findAll = findAll

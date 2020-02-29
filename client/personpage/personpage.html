@@ -224,6 +224,10 @@
             cursor: pointer;
         }
 
+        .content .file .bottom ul li span i.fileid{
+            display: none;
+        }
+
         .content .file .bottom ul li span .fileicon {
             margin-right: 10px;
         }
@@ -347,7 +351,6 @@
     <div class="nav">
         <marquee behavior="scroll" direction="left" style="width:85%;">富强,民主,文明,和谐,自由,平等,公正,法治</marquee>
         <img src="" alt="headimg" id="headimg">
-        <!-- <span class="username"></span> -->
         <span class="updata">用户管理</span>
         <div class="information" id="information">
             <div class="user-username">
@@ -403,63 +406,7 @@
                     <span class="s s2">文件大小</span>
                     <span class="s s3">修改日期</span>
                 </div>
-                <ul id="filelist">
-                    <!-- <li>
-                        <span class="s s1 filename ">
-                            <input name="Fruit" type="checkbox" value="" />
-                            <i class="iconfont icon-video- fileicon"></i>
-                            <span class="name">13245</span>
-                            <a href="#" class="download"><i class="iconfont icon-xiazai"></i></a>
-                            <i class="iconfont icon-shanchu"></i>
-                        </span>
-                        <span class="s s2 filesize">1234</span>
-                        <span class="s s3 date">2019-2-29 17:00</span>
-                    </li>
-                    <li>
-                        <span class="s s1 filename ">
-                            <input name="Fruit" type="checkbox" value="" />
-                            <i class="iconfont icon-video- fileicon"></i>
-                            <span class="name">13245</span>
-                            <a href="#" class="download"><i class="iconfont icon-xiazai"></i></a>
-                            <i class="iconfont icon-shanchu"></i>
-                        </span>
-                        <span class="s s2 filesize">1234</span>
-                        <span class="s s3 date">2019-2-29 17:00</span>
-                    </li>
-                    <li>
-                        <span class="s s1 filename ">
-                            <input name="Fruit" type="checkbox" value="" />
-                            <i class="iconfont icon-video- fileicon"></i>
-                            <span class="name">13245</span>
-                            <a href="#" class="download"><i class="iconfont icon-xiazai"></i></a>
-                            <i class="iconfont icon-shanchu"></i>
-                        </span>
-                        <span class="s s2 filesize">1234</span>
-                        <span class="s s3 date">2019-2-29 17:00</span>
-                    </li>
-                    <li>
-                        <span class="s s1 filename ">
-                            <input name="Fruit" type="checkbox" value="" />
-                            <i class="iconfont icon-video- fileicon"></i>
-                            <span class="name">13245</span>
-                            <a href="#" class="download"><i class="iconfont icon-xiazai"></i></a>
-                            <i class="iconfont icon-shanchu"></i>
-                        </span>
-                        <span class="s s2 filesize">1234</span>
-                        <span class="s s3 date">2019-2-29 17:00</span>
-                    </li>
-                    <li>
-                        <span class="s s1 filename ">
-                            <input name="Fruit" type="checkbox" value="" />
-                            <i class="iconfont icon-video- fileicon"></i>
-                            <span class="name">13245</span>
-                            <a href="#" class="download"><i class="iconfont icon-xiazai"></i></a>
-                            <i class="iconfont icon-shanchu"></i>
-                        </span>
-                        <span class="s s2 filesize">1234</span>
-                        <span class="s s3 date">2019-2-29 17:00</span>
-                    </li> -->
-                </ul>
+                <ul id="filelist"></ul>
 
 
             </div>
@@ -616,6 +563,7 @@
             </script>
         </div>
     </div>
+    <!-- 模板 -->
     <script id="test" type="text/html">
         {{each list as value i}}
             <li>
@@ -631,6 +579,7 @@
                     <span class="name">{{ value.filename }}</span>
                     <a href="{{ value.filepath }}" class="download" download="{{ value.fullname }}"><i class="iconfont icon-xiazai"></i></a>
                     <i class="iconfont icon-shanchu"></i>
+                    <i class="fileid">{{ value.fileid }}</i>
                 </span>
                 <span class="s s2 filesize">{{ value.filesize }}</span>
                 <span class="s s3 date">{{ value.updt }}</span>
