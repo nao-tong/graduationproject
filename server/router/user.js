@@ -591,7 +591,6 @@ user.post('/deletefile', function (req, res) {
 //检索用户所拥有的所有文件（分类）
 user.post('/findfile', function (req, res) {
     let userid = aes.Decrypt(req.body.userid)
-    let array = []
     try {
         filelink.findOne(userid, function (data) {
             let filemessage = []
@@ -610,40 +609,40 @@ user.post('/findfile', function (req, res) {
                     }
                 }
             })
-                .then(function (arr) {
-                    let j = 0
-                    for (let i = 0; i < arr.length; i++) {
-                        filemsg.findOne(arr[i], function (data) {
-                            j++
-                            if (!data) {
-                                if (j == arr.length) {
-                                    res.send(filemessage)
-                                }
+            .then(function (arr) {
+                let j = 0
+                for (let i = 0; i < arr.length; i++) {
+                    filemsg.findOne(arr[i], function (data) {
+                        j++
+                        if (!data) {
+                            if (j == arr.length) {
+                                res.send(filemessage)
+                            }
+                        } else {
+                            let dt = data
+                            let date = new Date(Number(dt.updt))
+                            let hour = date.getHours() > 9 ? date.getHours() : '0' + date.getHours()
+                            let minute = date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()
+                            dt.updt = date.getFullYear() + '-' + date.getMonth() + 1 + '-' + date.getDate() + ' ' + hour + ':' + minute
+                            dt.fullname = dt.filename.split('-')[2]
+                            dt.filename = dt.filename.split('-')[2].split('.')[0]
+                            if (dt.filesize / 1024 < 1 || dt.filesize / 1024 / 1024 < 1) {
+                                dt.filesize = (dt.filesize / 1024).toFixed(2) + ' K'
+                            } else if (dt.filesize / 1024 / 1024 > 1 || dt.filesize / 1024 / 1024 / 1024 < 1) {
+                                dt.filesize = (dt.filesize / 1024 / 1024).toFixed(2) + ' M'
                             } else {
-                                let dt = data
-                                let date = new Date(Number(dt.updt))
-                                let hour = date.getHours() > 9 ? date.getHours() : '0' + date.getHours()
-                                let minute = date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()
-                                dt.updt = date.getFullYear() + '-' + date.getMonth() + 1 + '-' + date.getDate() + ' ' + hour + ':' + minute
-                                dt.fullname = dt.filename.split('-')[2]
-                                dt.filename = dt.filename.split('-')[2].split('.')[0]
-                                if (dt.filesize / 1024 < 1 || dt.filesize / 1024 / 1024 < 1) {
-                                    dt.filesize = (dt.filesize / 1024).toFixed(2) + ' K'
-                                } else if (dt.filesize / 1024 / 1024 > 1 || dt.filesize / 1024 / 1024 / 1024 < 1) {
-                                    dt.filesize = (dt.filesize / 1024 / 1024).toFixed(2) + ' M'
-                                } else {
-                                    dt.filesize = (dt.filesize / 1024 / 1024 / 1024).toFixed(2) + ' G'
-                                }
-
-                                filemessage.push(dt)
-                                if (j == arr.length) {
-                                    res.send(filemessage)
-                                }
+                                dt.filesize = (dt.filesize / 1024 / 1024 / 1024).toFixed(2) + ' G'
                             }
 
-                        })
-                    }
-                })
+                            filemessage.push(dt)
+                            if (j == arr.length) {
+                                res.send(filemessage)
+                            }
+                        }
+
+                    })
+                }
+            })
         })
     } catch (eror) {
         fs.writeFile('../log.txt', '"' + error + '"', function (err) {
@@ -657,6 +656,146 @@ user.post('/findfile', function (req, res) {
 
 })
 
+//文件分类
+user.post('/typefile',function(req,res){
+    let type = req.body.type
+    let userid = aes.Decrypt(req.headers.userid)
+    try {
+        //查询到用户拥有的所有文件
+        filelink.findOne(userid, function (data) {
+            let filemessage = []
+            new Promise(function (resolve) {
+                let arr = []
+                let num = 0
+                for (let item in data) {
+                    num++
+                    if (item == 'userid') {
+                        continue
+                    } else {
+                        arr.push(data[item])
+                        if (num == Object.keys(data).length) {
+                            resolve(arr)
+                        }
+                    }
+                }
+            })
+            .then(function (arr) {
+                let j = 0
+                for (let i = 0; i < arr.length; i++) {
+                    filemsg.findOne(arr[i], function (data) {
+                        j++
+                        if (!data) {
+                            if (j == arr.length) {
+                                res.send(filemessage)
+                            }
+                        } else if(data.filetype != type){
+                            //不符合文件类型
+                        } else {
+                            let dt = data
+                            let date = new Date(Number(dt.updt))
+                            let hour = date.getHours() > 9 ? date.getHours() : '0' + date.getHours()
+                            let minute = date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()
+                            dt.updt = date.getFullYear() + '-' + date.getMonth() + 1 + '-' + date.getDate() + ' ' + hour + ':' + minute
+                            dt.fullname = dt.filename.split('-')[2]
+                            dt.filename = dt.filename.split('-')[2].split('.')[0]
+                            if (dt.filesize / 1024 < 1 || dt.filesize / 1024 / 1024 < 1) {
+                                dt.filesize = (dt.filesize / 1024).toFixed(2) + ' K'
+                            } else if (dt.filesize / 1024 / 1024 > 1 || dt.filesize / 1024 / 1024 / 1024 < 1) {
+                                dt.filesize = (dt.filesize / 1024 / 1024).toFixed(2) + ' M'
+                            } else {
+                                dt.filesize = (dt.filesize / 1024 / 1024 / 1024).toFixed(2) + ' G'
+                            }
+
+                            filemessage.push(dt)
+                            if (j == arr.length) {
+                                res.send(filemessage)
+                            }
+                        }
+
+                    })
+                }
+            })
+        })
+    } catch (eror) {
+        fs.writeFile('../log.txt', '"' + error + '"', function (err) {
+            if (err) {
+                console.log('写入失败')
+            } else {
+                console.log('写入成功了')
+            }
+        })
+    }
+})
+//文件搜索
+user.post('/queryfile',function(req,res){
+    let message = req.body.message
+    let userid = aes.Decrypt(req.headers.userid)
+    try {
+        //查询到用户拥有的所有文件
+        filelink.findOne(userid, function (data) {
+            let filemessage = []
+            new Promise(function (resolve) {
+                let arr = []
+                let num = 0
+                for (let item in data) {
+                    num++
+                    if (item == 'userid') {
+                        continue
+                    } else {
+                        arr.push(data[item])
+                        if (num == Object.keys(data).length) {
+                            resolve(arr)
+                        }
+                    }
+                }
+            })
+            .then(function (arr) {
+                let j = 0
+                for (let i = 0; i < arr.length; i++) {
+                    filemsg.findOne(arr[i], function (data) {
+                        j++
+                        if (!data) {
+                            if (j == arr.length) {
+                                res.send(filemessage)
+                            }
+                        } else if(data.filename.split('-')[2].split('.')[0].indexOf(message) == -1){
+                            //不符合文件类型
+                        } else {
+                            let dt = data
+                            let date = new Date(Number(dt.updt))
+                            let hour = date.getHours() > 9 ? date.getHours() : '0' + date.getHours()
+                            let minute = date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()
+                            dt.updt = date.getFullYear() + '-' + date.getMonth() + 1 + '-' + date.getDate() + ' ' + hour + ':' + minute
+                            dt.fullname = dt.filename.split('-')[2]
+                            dt.filename = dt.filename.split('-')[2].split('.')[0]
+                            if (dt.filesize / 1024 < 1 || dt.filesize / 1024 / 1024 < 1) {
+                                dt.filesize = (dt.filesize / 1024).toFixed(2) + ' K'
+                            } else if (dt.filesize / 1024 / 1024 > 1 || dt.filesize / 1024 / 1024 / 1024 < 1) {
+                                dt.filesize = (dt.filesize / 1024 / 1024).toFixed(2) + ' M'
+                            } else {
+                                dt.filesize = (dt.filesize / 1024 / 1024 / 1024).toFixed(2) + ' G'
+                            }
+
+                            filemessage.push(dt)
+                            if (j == arr.length) {
+                                res.send(filemessage)
+                            }
+                        }
+
+                    })
+                }
+            })
+        })
+    } catch (eror) {
+        fs.writeFile('../log.txt', '"' + error + '"', function (err) {
+            if (err) {
+                console.log('写入失败')
+            } else {
+                console.log('写入成功了')
+            }
+        })
+    }
+})
 
 //暴露user
 module.exports = user

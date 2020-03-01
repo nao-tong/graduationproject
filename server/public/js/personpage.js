@@ -43,25 +43,34 @@ if (!cookieobj.login) {
 
 $(function () {
 
-    function getfile(){
-        $.ajax({
-            url: "/findfile",
-            dataType: "json",
-            type: "post",
-            data: { userid: cookieobj.login },
-            beforeSend: function (request) {
-                //将cookie中的token信息放于请求头中
-                request.setRequestHeader("token", cookieobj.user);
-            },
-            success: function (res) {
-                //文件信息
-                var data = {
-                    list: res
-                }
-                var html = template('test', data)
-                document.getElementById('filelist').innerHTML = html
+    function getfile(dt){
+        if(dt){
+            var data = {
+                list: dt
             }
-        })
+            var html = template('test', data)
+            document.getElementById('filelist').innerHTML = html
+        }else{
+            $.ajax({
+                url: "/findfile",
+                dataType: "json",
+                type: "post",
+                data: { userid: cookieobj.login },
+                beforeSend: function (request) {
+                    //将cookie中的token信息放于请求头中
+                    request.setRequestHeader("token", cookieobj.user);
+                },
+                success: function (res) {
+                    //文件信息
+                    var data = {
+                        list: res
+                    }
+                    var html = template('test', data)
+                    document.getElementById('filelist').innerHTML = html
+                }
+            })
+        }
+        
     }
 
     $.ajax({
@@ -140,6 +149,64 @@ $(function () {
 
     $('.chart').click(function (e) {
         $('#charttype').text($(e.target).text())
+    })
+
+    //文件搜索
+    $('.icon-tubiao-').click(function(){
+        let message = $('.seachdata').val()
+        if(!message){
+            $('.seachdata').val('请输入关键信息')
+        }else{
+            $.ajax({
+                url: '/queryfile',
+                data: {message},
+                type: 'post',
+                beforeSend: function (request) {
+                    //将cookie中的token信息放于请求头中
+                    request.setRequestHeader("token", cookieobj.user)
+                    request.setRequestHeader('userid',cookieobj.login)
+                },
+                success: function (data) {
+                    //刷新页面
+                    if(data){
+                        getfile(data)
+                    }else{
+                        //服务端错误
+                    }
+                }
+            })
+        }
+    })
+
+    //分类文件
+    $('.secondbox').on('click','span',function(e){
+        let filetype = $(e.target).text()
+        let type
+        if(filetype == '视频'){
+            type = 'video'
+        }else if(filetype == '图片'){
+            type = 'image'
+        }else{
+            type = 'text'
+        }
+        $.ajax({
+            url: '/typefile',
+            data: {type},
+            type: 'post',
+            beforeSend: function (request) {
+                //将cookie中的token信息放于请求头中
+                request.setRequestHeader("token", cookieobj.user)
+                request.setRequestHeader('userid',cookieobj.login)
+            },
+            success: function (data) {
+                //刷新页面
+                if(data){
+                    getfile(data)
+                }else{
+                    //服务端错误
+                }
+            }
+        })
     })
 
     /**
