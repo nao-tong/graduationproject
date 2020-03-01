@@ -54,7 +54,6 @@ $(function () {
                 request.setRequestHeader("token", cookieobj.user);
             },
             success: function (res) {
-                console.log(res)
                 //文件信息
                 var data = {
                     list: res
@@ -164,6 +163,11 @@ $(function () {
             },
             success: function (data) {
                 //刷新页面
+                if(data){
+                    getfile()
+                }else{
+                    //服务端错误
+                }
             }
         })
     })

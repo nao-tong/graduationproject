@@ -141,10 +141,20 @@ function addFile(fileobj, callback) {
 // deleteField('file','file1',function(){})
 
 //删除某一文件id
-
-findOne('0',function(data){
-    console.log(data)
-})
+// findOne('0',function(data){
+//     let fileid = '0'
+//     let fileobj = {}
+//     fileobj.userid = '0'
+//     fileobj.fileid = ''
+//     for(let item in data){
+//         if(data[item] == fileid){
+//             fileobj.field = item
+//         }
+//     }
+//     upDate(fileobj,function(dt){
+//         console.log(dt)
+//     })
+// })
 
 
 

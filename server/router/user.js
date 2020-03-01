@@ -358,7 +358,6 @@ user.post('/uploadfile', upload.single('avatar'), function (req, res) {
                                 for (let i = 0; i < arr.length; i++) {
                                     if (!data[arr[i]]) {
                                         //查询到空字段
-                                        console.log('true')
                                         field.empty = arr[i]
                                         fileobj.field = arr[i]
                                         resolve(field)
@@ -532,19 +531,61 @@ user.post('/deletefile', function (req, res) {
     let filepath = req.body.filepath;
     let userid = aes.Decrypt(req.headers.userid)
     let fileid = req.body.fileid
+    let dlt = false
 
     /**
      * 先删除filemsg，再删除fileid，再删除文件
      */
-    
-    // fs.unlink('./' + filepath, function (err) {
-    //     if (err) {
-    //         console.log(err);
-    //         return false;
-    //     }
-    //     console.log('删除文件成功');
-    // });
 
+    try{
+        new Promise(function(resolve){
+            filemsg.deleteData(fileid,function(data){
+                if(data){
+                    resolve()
+                }
+            })
+        })
+        .then(function(){
+            return new Promise(function(resolve){
+                filelink.findOne('0',function(data){
+                    let fileobj = {}
+                    fileobj.userid = userid
+                    fileobj.fileid = ''
+                    for(let item in data){
+                        if(data[item] == fileid){
+                            fileobj.field = item
+                        }
+                    }
+                    filelink.upDate(fileobj,function(dt){
+                        if(dt){
+                            resolve()
+                        }
+                    })
+                })
+            })
+            
+        })
+        .then(function(){
+            fs.unlink('./' + filepath, function (err) {
+                if (err) {
+                    console.log(err);
+                    return false;
+                }
+                dlt = true
+                res.send(dlt)
+            });
+        })
+    }catch(error){
+        fs.writeFile('../log.txt', '"' + error + '"', function (err) {
+            if (err) {
+                console.log('写入失败')
+            } else {
+                console.log('写入成功了')
+            }
+        })
+        res.send(dlt)
+    }
+    
 })
 
 //检索用户所拥有的所有文件（分类）
