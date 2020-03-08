@@ -15,6 +15,7 @@ const aes = require('../encAnddec/aes')
 const JwtUtil = require('../encapsulation/jwt')
 const usertable = require('../db/usertable')
 const tablelink = require('../db/tablelink')
+const createtable = require('../db/createtable')
 const filelink = require('../db/filelink')
 const filemsg = require('../db/filemsg')
 
@@ -537,45 +538,45 @@ user.post('/deletefile', function (req, res) {
      * 先删除filemsg，再删除fileid，再删除文件
      */
 
-    try{
-        new Promise(function(resolve){
-            filemsg.deleteData(fileid,function(data){
-                if(data){
+    try {
+        new Promise(function (resolve) {
+            filemsg.deleteData(fileid, function (data) {
+                if (data) {
                     resolve()
                 }
             })
         })
-        .then(function(){
-            return new Promise(function(resolve){
-                filelink.findOne('0',function(data){
-                    let fileobj = {}
-                    fileobj.userid = userid
-                    fileobj.fileid = ''
-                    for(let item in data){
-                        if(data[item] == fileid){
-                            fileobj.field = item
+            .then(function () {
+                return new Promise(function (resolve) {
+                    filelink.findOne('0', function (data) {
+                        let fileobj = {}
+                        fileobj.userid = userid
+                        fileobj.fileid = ''
+                        for (let item in data) {
+                            if (data[item] == fileid) {
+                                fileobj.field = item
+                            }
                         }
-                    }
-                    filelink.upDate(fileobj,function(dt){
-                        if(dt){
-                            resolve()
-                        }
+                        filelink.upDate(fileobj, function (dt) {
+                            if (dt) {
+                                resolve()
+                            }
+                        })
                     })
                 })
+
             })
-            
-        })
-        .then(function(){
-            fs.unlink('./' + filepath, function (err) {
-                if (err) {
-                    console.log(err);
-                    return false;
-                }
-                dlt = true
-                res.send(dlt)
-            });
-        })
-    }catch(error){
+            .then(function () {
+                fs.unlink('./' + filepath, function (err) {
+                    if (err) {
+                        console.log(err);
+                        return false;
+                    }
+                    dlt = true
+                    res.send(dlt)
+                });
+            })
+    } catch (error) {
         fs.writeFile('../log.txt', '"' + error + '"', function (err) {
             if (err) {
                 console.log('写入失败')
@@ -585,7 +586,7 @@ user.post('/deletefile', function (req, res) {
         })
         res.send(dlt)
     }
-    
+
 })
 
 //检索用户所拥有的所有文件（分类）
@@ -609,40 +610,40 @@ user.post('/findfile', function (req, res) {
                     }
                 }
             })
-            .then(function (arr) {
-                let j = 0
-                for (let i = 0; i < arr.length; i++) {
-                    filemsg.findOne(arr[i], function (data) {
-                        j++
-                        if (!data) {
-                            if (j == arr.length) {
-                                res.send(filemessage)
-                            }
-                        } else {
-                            let dt = data
-                            let date = new Date(Number(dt.updt))
-                            let hour = date.getHours() > 9 ? date.getHours() : '0' + date.getHours()
-                            let minute = date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()
-                            dt.updt = date.getFullYear() + '-' + date.getMonth() + 1 + '-' + date.getDate() + ' ' + hour + ':' + minute
-                            dt.fullname = dt.filename.split('-')[2]
-                            dt.filename = dt.filename.split('-')[2].split('.')[0]
-                            if (dt.filesize / 1024 < 1 || dt.filesize / 1024 / 1024 < 1) {
-                                dt.filesize = (dt.filesize / 1024).toFixed(2) + ' K'
-                            } else if (dt.filesize / 1024 / 1024 > 1 || dt.filesize / 1024 / 1024 / 1024 < 1) {
-                                dt.filesize = (dt.filesize / 1024 / 1024).toFixed(2) + ' M'
+                .then(function (arr) {
+                    let j = 0
+                    for (let i = 0; i < arr.length; i++) {
+                        filemsg.findOne(arr[i], function (data) {
+                            j++
+                            if (!data) {
+                                if (j == arr.length) {
+                                    res.send(filemessage)
+                                }
                             } else {
-                                dt.filesize = (dt.filesize / 1024 / 1024 / 1024).toFixed(2) + ' G'
+                                let dt = data
+                                let date = new Date(Number(dt.updt))
+                                let hour = date.getHours() > 9 ? date.getHours() : '0' + date.getHours()
+                                let minute = date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()
+                                dt.updt = date.getFullYear() + '-' + date.getMonth() + 1 + '-' + date.getDate() + ' ' + hour + ':' + minute
+                                dt.fullname = dt.filename.split('-')[2]
+                                dt.filename = dt.filename.split('-')[2].split('.')[0]
+                                if (dt.filesize / 1024 < 1 || dt.filesize / 1024 / 1024 < 1) {
+                                    dt.filesize = (dt.filesize / 1024).toFixed(2) + ' K'
+                                } else if (dt.filesize / 1024 / 1024 > 1 || dt.filesize / 1024 / 1024 / 1024 < 1) {
+                                    dt.filesize = (dt.filesize / 1024 / 1024).toFixed(2) + ' M'
+                                } else {
+                                    dt.filesize = (dt.filesize / 1024 / 1024 / 1024).toFixed(2) + ' G'
+                                }
+
+                                filemessage.push(dt)
+                                if (j == arr.length) {
+                                    res.send(filemessage)
+                                }
                             }
 
-                            filemessage.push(dt)
-                            if (j == arr.length) {
-                                res.send(filemessage)
-                            }
-                        }
-
-                    })
-                }
-            })
+                        })
+                    }
+                })
         })
     } catch (eror) {
         fs.writeFile('../log.txt', '"' + error + '"', function (err) {
@@ -657,7 +658,7 @@ user.post('/findfile', function (req, res) {
 })
 
 //文件分类
-user.post('/typefile',function(req,res){
+user.post('/typefile', function (req, res) {
     let type = req.body.type
     let userid = aes.Decrypt(req.headers.userid)
     try {
@@ -679,42 +680,42 @@ user.post('/typefile',function(req,res){
                     }
                 }
             })
-            .then(function (arr) {
-                let j = 0
-                for (let i = 0; i < arr.length; i++) {
-                    filemsg.findOne(arr[i], function (data) {
-                        j++
-                        if (!data) {
-                            if (j == arr.length) {
-                                res.send(filemessage)
-                            }
-                        } else if(data.filetype != type){
-                            //不符合文件类型
-                        } else {
-                            let dt = data
-                            let date = new Date(Number(dt.updt))
-                            let hour = date.getHours() > 9 ? date.getHours() : '0' + date.getHours()
-                            let minute = date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()
-                            dt.updt = date.getFullYear() + '-' + date.getMonth() + 1 + '-' + date.getDate() + ' ' + hour + ':' + minute
-                            dt.fullname = dt.filename.split('-')[2]
-                            dt.filename = dt.filename.split('-')[2].split('.')[0]
-                            if (dt.filesize / 1024 < 1 || dt.filesize / 1024 / 1024 < 1) {
-                                dt.filesize = (dt.filesize / 1024).toFixed(2) + ' K'
-                            } else if (dt.filesize / 1024 / 1024 > 1 || dt.filesize / 1024 / 1024 / 1024 < 1) {
-                                dt.filesize = (dt.filesize / 1024 / 1024).toFixed(2) + ' M'
+                .then(function (arr) {
+                    let j = 0
+                    for (let i = 0; i < arr.length; i++) {
+                        filemsg.findOne(arr[i], function (data) {
+                            j++
+                            if (!data) {
+                                if (j == arr.length) {
+                                    res.send(filemessage)
+                                }
+                            } else if (data.filetype != type) {
+                                //不符合文件类型
                             } else {
-                                dt.filesize = (dt.filesize / 1024 / 1024 / 1024).toFixed(2) + ' G'
+                                let dt = data
+                                let date = new Date(Number(dt.updt))
+                                let hour = date.getHours() > 9 ? date.getHours() : '0' + date.getHours()
+                                let minute = date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()
+                                dt.updt = date.getFullYear() + '-' + date.getMonth() + 1 + '-' + date.getDate() + ' ' + hour + ':' + minute
+                                dt.fullname = dt.filename.split('-')[2]
+                                dt.filename = dt.filename.split('-')[2].split('.')[0]
+                                if (dt.filesize / 1024 < 1 || dt.filesize / 1024 / 1024 < 1) {
+                                    dt.filesize = (dt.filesize / 1024).toFixed(2) + ' K'
+                                } else if (dt.filesize / 1024 / 1024 > 1 || dt.filesize / 1024 / 1024 / 1024 < 1) {
+                                    dt.filesize = (dt.filesize / 1024 / 1024).toFixed(2) + ' M'
+                                } else {
+                                    dt.filesize = (dt.filesize / 1024 / 1024 / 1024).toFixed(2) + ' G'
+                                }
+
+                                filemessage.push(dt)
+                                if (j == arr.length) {
+                                    res.send(filemessage)
+                                }
                             }
 
-                            filemessage.push(dt)
-                            if (j == arr.length) {
-                                res.send(filemessage)
-                            }
-                        }
-
-                    })
-                }
-            })
+                        })
+                    }
+                })
         })
     } catch (eror) {
         fs.writeFile('../log.txt', '"' + error + '"', function (err) {
@@ -726,8 +727,9 @@ user.post('/typefile',function(req,res){
         })
     }
 })
+
 //文件搜索
-user.post('/queryfile',function(req,res){
+user.post('/queryfile', function (req, res) {
     let message = req.body.message
     let userid = aes.Decrypt(req.headers.userid)
     try {
@@ -749,42 +751,42 @@ user.post('/queryfile',function(req,res){
                     }
                 }
             })
-            .then(function (arr) {
-                let j = 0
-                for (let i = 0; i < arr.length; i++) {
-                    filemsg.findOne(arr[i], function (data) {
-                        j++
-                        if (!data) {
-                            if (j == arr.length) {
-                                res.send(filemessage)
-                            }
-                        } else if(data.filename.split('-')[2].split('.')[0].indexOf(message) == -1){
-                            //不符合文件类型
-                        } else {
-                            let dt = data
-                            let date = new Date(Number(dt.updt))
-                            let hour = date.getHours() > 9 ? date.getHours() : '0' + date.getHours()
-                            let minute = date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()
-                            dt.updt = date.getFullYear() + '-' + date.getMonth() + 1 + '-' + date.getDate() + ' ' + hour + ':' + minute
-                            dt.fullname = dt.filename.split('-')[2]
-                            dt.filename = dt.filename.split('-')[2].split('.')[0]
-                            if (dt.filesize / 1024 < 1 || dt.filesize / 1024 / 1024 < 1) {
-                                dt.filesize = (dt.filesize / 1024).toFixed(2) + ' K'
-                            } else if (dt.filesize / 1024 / 1024 > 1 || dt.filesize / 1024 / 1024 / 1024 < 1) {
-                                dt.filesize = (dt.filesize / 1024 / 1024).toFixed(2) + ' M'
+                .then(function (arr) {
+                    let j = 0
+                    for (let i = 0; i < arr.length; i++) {
+                        filemsg.findOne(arr[i], function (data) {
+                            j++
+                            if (!data) {
+                                if (j == arr.length) {
+                                    res.send(filemessage)
+                                }
+                            } else if (data.filename.split('-')[2].split('.')[0].indexOf(message) == -1) {
+                                //不符合文件类型
                             } else {
-                                dt.filesize = (dt.filesize / 1024 / 1024 / 1024).toFixed(2) + ' G'
+                                let dt = data
+                                let date = new Date(Number(dt.updt))
+                                let hour = date.getHours() > 9 ? date.getHours() : '0' + date.getHours()
+                                let minute = date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()
+                                dt.updt = date.getFullYear() + '-' + date.getMonth() + 1 + '-' + date.getDate() + ' ' + hour + ':' + minute
+                                dt.fullname = dt.filename.split('-')[2]
+                                dt.filename = dt.filename.split('-')[2].split('.')[0]
+                                if (dt.filesize / 1024 < 1 || dt.filesize / 1024 / 1024 < 1) {
+                                    dt.filesize = (dt.filesize / 1024).toFixed(2) + ' K'
+                                } else if (dt.filesize / 1024 / 1024 > 1 || dt.filesize / 1024 / 1024 / 1024 < 1) {
+                                    dt.filesize = (dt.filesize / 1024 / 1024).toFixed(2) + ' M'
+                                } else {
+                                    dt.filesize = (dt.filesize / 1024 / 1024 / 1024).toFixed(2) + ' G'
+                                }
+
+                                filemessage.push(dt)
+                                if (j == arr.length) {
+                                    res.send(filemessage)
+                                }
                             }
 
-                            filemessage.push(dt)
-                            if (j == arr.length) {
-                                res.send(filemessage)
-                            }
-                        }
-
-                    })
-                }
-            })
+                        })
+                    }
+                })
         })
     } catch (eror) {
         fs.writeFile('../log.txt', '"' + error + '"', function (err) {
@@ -795,6 +797,217 @@ user.post('/queryfile',function(req,res){
             }
         })
     }
+})
+
+//获取用户创建的所有表?
+user.post('/alltable', function (req, res) {
+
+})
+
+//添加表?
+user.post('/addtable', function (req, res) {
+    let result = {}
+    let tableobj = {}
+    tableobj.userid = aes.Decrypt(req.headers.userid)
+    let tablename = req.body.tablename
+    tableobj.tablename = tablename
+    let field = req.body.field
+    let rowdata = req.body.rowdata
+    //给用户添加链接表名
+    //文件关联数据库
+    try {
+        //添加字段(判断字段是否为空，为空直接添加数据，不为空则先添加字段，再添加数据？？？)
+        //查询空字段
+        tablelink.descTable('tablelink', function (data) {
+            let objlength = Object.keys(data).length
+            let arr = []
+            for (let i = 0; i < objlength; i++) {
+                if (data[i].Field == 'userid') {
+                    continue
+                } else {
+                    arr.push(data[i].Field)
+                }
+            }
+            if (arr.length) {
+                new Promise(function (resolve, reject) {
+                    tablelink.findOne(userid, function (data) {
+                        if (data) {
+                            let field = {}
+                            for (let i = 0; i < arr.length; i++) {
+                                if (!data[arr[i]]) {
+                                    //查询到空字段
+                                    field.empty = arr[i]
+                                    tableobj.field = arr[i]
+                                    resolve(field)
+                                    break
+                                } else {
+                                    if (i == arr.length - 1) {
+                                        //没有空字段,需要增加字段
+                                        field.empty = false
+                                        resolve(field)
+                                    }
+                                }
+                            }
+                        } else {
+                            reject()
+                        }
+
+                    })
+                })
+                    .then(function (data) {
+                        if (data.empty) {
+                            //有空字段
+                            tablelink.upDate(fileobj, function () {
+                                //字段添加成功后添加表格信息????
+                                addTable(tablename,field,rowdata)
+                            })
+                        } else {
+                            //无空字段
+                            new Promise(function (resolve, reject) {
+                                tablelink.descTable('tablelink', function (data) {
+                                    //console.log(data[data.length - 1].Field.indexOf('file'))
+                                    if (data) {
+                                        if (!data[data.length - 1].Field.indexOf('table')) {
+                                            let field = 'table' + (Number(data[data.length - 1].Field.split('e')[1]) + 1)
+                                            tablelink.addField('tablelink', field, function (data) {
+                                                tableobj.field = field
+                                                resolve(tableobj)
+                                            })
+                                        } else {
+                                            tablelink.addField('tablelink', 'table1', function (data) {
+                                                tableobj.field = 'table1'
+                                                resolve(tableobj)
+                                            })
+                                        }
+                                    } else {
+                                        reject(data)
+                                    }
+                                    //console.log(data[data.length - 1].Field)
+                                })
+                            })
+                                .then(function (data) {
+                                    tablelink.upDate(data, function () {
+                                        //字段添加成功后添加表格信息???
+                                        addTable(tablename,field,rowdata)
+                                    })
+                                }, function () {
+                                    res.send(result)
+                                })
+                        }
+                    }, function () {
+                        //查询失败
+                    })
+            } else {
+                //没有字段，需添加字段
+                new Promise(function (resolve, reject) {
+                    tablelink.descTable('tablelink', function (data) {
+                        //console.log(data[data.length - 1].Field.indexOf('file'))
+
+                        if (data) {
+                            if (!data[data.length - 1].Field.indexOf('table')) {
+                                let field = 'table' + (Number(data[data.length - 1].Field.split('e')[1]) + 1)
+                                tablelink.addField('tablelink', field, function (data) {
+                                    tableobj.field = field
+                                    resolve(tableobj)
+                                })
+                            } else {
+                                tablelink.addField('tablelink', 'table1', function (data) {
+                                    tableobj.field = 'table1'
+                                    resolve(tableobj)
+                                })
+                            }
+                        } else {
+                            reject(data)
+                        }
+                        //console.log(data[data.length - 1].Field)
+                    })
+                })
+                    .then(function (data) {
+                        tablelink.upDate(data, function () {
+                            //字段添加成功后添加表格信息？？？
+                            addTable(tablename,field,rowdata)
+                        })
+                    }, function () {
+                        res.send(result)
+                    })
+            }
+        })
+    } catch (error) {
+        fs.writeFile('../log.txt', '"' + error + '"', function (err) {
+            if (err) {
+                console.log('写入失败')
+            } else {
+                console.log('写入成功了')
+            }
+        })
+    }
+
+    function addTable(tn,fd,ra){
+        let tablename = tn
+        let field = fd
+        let rowdata = ra
+        //添加表格到数据库
+        new Promise(function (resolve, reject) {
+            createtable.createTable(tablename, function (data) {
+                if (!data) {
+                    //创建成功
+                    resolve()
+                } else {
+                    //创建失败?
+                    reject()
+                }
+            })
+        })
+            .then(function () {
+                return new Promise(function (resolve, reject) {
+                    //创建成功,添加字段
+                    let j = 0
+                    for (let i = 0; i < field.length; i++) {
+                        createtable.addField(tablename, field[i], function (data) {
+                            j++
+                            if (data) {
+                                if (j == field.length) {
+                                    resolve()
+                                }
+                            } else {
+                                //添加字段失败，删除表
+                            }
+                        })
+                    }
+                })
+
+            }, function () {
+                //此表已存在
+                result.success = false
+                res.send(result)
+            })
+            .then(function () {
+                //字段添加成功,添加数据
+                let j = 0
+                for (let i = 0; i < rowdata.length; i++) {
+                    
+                    createtable.addData(tablename, rowdata[i], function (data) {
+                        j++
+                        if(data){
+                            if(j == rowdata.length){
+                                result.success = true
+                                res.send(result)
+                            }
+                        }
+                    })
+                }
+            }, function () {
+                //添加字段失败
+            })
+    }
+
+    
+
+})
+
+//编辑表?
+user.post('/edittable', function (req, res) {
+
 })
 
 //暴露user

@@ -43,14 +43,14 @@ if (!cookieobj.login) {
 
 $(function () {
 
-    function getfile(dt){
-        if(dt){
+    function getfile(dt) {
+        if (dt) {
             var data = {
                 list: dt
             }
             var html = template('test', data)
             document.getElementById('filelist').innerHTML = html
-        }else{
+        } else {
             $.ajax({
                 url: "/findfile",
                 dataType: "json",
@@ -70,7 +70,7 @@ $(function () {
                 }
             })
         }
-        
+
     }
 
     $.ajax({
@@ -92,32 +92,32 @@ $(function () {
     getfile()
 
     //头像下拉信息
-    $('#headimg').mouseenter(function(){
-        $('#information').css('display','block')
+    $('#headimg').mouseenter(function () {
+        $('#information').css('display', 'block')
     })
-    $('#information').mouseenter(function(){
-        $('#information').css('display','block')
+    $('#information').mouseenter(function () {
+        $('#information').css('display', 'block')
     })
-    $('#headimg').mouseleave(function(){
-        $('#information').css('display','none')
+    $('#headimg').mouseleave(function () {
+        $('#information').css('display', 'none')
     })
-    $('#information').mouseleave(function(){
-        $('#information').css('display','none')
+    $('#information').mouseleave(function () {
+        $('#information').css('display', 'none')
     })
 
     //退出
-    $('#exit').click(function(){
+    $('#exit').click(function () {
         new Cookie({
-            name:"login",
-            value:'',
-            time:0,
-            path:"/"
+            name: "login",
+            value: '',
+            time: 0,
+            path: "/"
         })
         location.replace(location.href)
     })
 
     //修改信息
-    $('#persondate').click(function(){
+    $('#persondate').click(function () {
         window.location.href = '/user/alter';
         window.navigate('/user/alter');
         window.location.replace('/user/alter');
@@ -130,7 +130,7 @@ $(function () {
         $('.xiala').removeClass('active')
         $('.files').addClass('active')
         $('.files').siblings().stop().slideToggle()
-        $('.form').css('display', 'none')
+        $('.addtable').css('display', 'none')
         $('.file').css('display', 'block')
     })
 
@@ -139,38 +139,38 @@ $(function () {
         $('.tables').addClass('active')
         $('.tables').siblings().stop().slideToggle()
         $('.file').css('display', 'none')
-        $('.form').css('display', 'block')
+        $('.addtable').css('display', 'block')
     })
 
-    //图标类型选择
-    $('#charttype').click(function () {
-        $('.chartbox').stop().slideToggle()
-    })
 
-    $('.chart').click(function (e) {
-        $('#charttype').text($(e.target).text())
+
+
+
+    $('#delete').click(function () {
+        $('.seachdata').val('')
+        getfile()
     })
 
     //文件搜索
-    $('.icon-tubiao-').click(function(){
+    $('.seachfile').click(function () {
         let message = $('.seachdata').val()
-        if(!message){
+        if (!message) {
             $('.seachdata').val('请输入关键信息')
-        }else{
+        } else {
             $.ajax({
                 url: '/queryfile',
-                data: {message},
+                data: { message },
                 type: 'post',
                 beforeSend: function (request) {
                     //将cookie中的token信息放于请求头中
                     request.setRequestHeader("token", cookieobj.user)
-                    request.setRequestHeader('userid',cookieobj.login)
+                    request.setRequestHeader('userid', cookieobj.login)
                 },
                 success: function (data) {
                     //刷新页面
-                    if(data){
+                    if (data) {
                         getfile(data)
-                    }else{
+                    } else {
                         //服务端错误
                     }
                 }
@@ -179,30 +179,30 @@ $(function () {
     })
 
     //分类文件
-    $('.secondbox').on('click','span',function(e){
+    $('.secondbox').on('click', 'span', function (e) {
         let filetype = $(e.target).text()
         let type
-        if(filetype == '视频'){
+        if (filetype == '视频') {
             type = 'video'
-        }else if(filetype == '图片'){
+        } else if (filetype == '图片') {
             type = 'image'
-        }else{
+        } else {
             type = 'text'
         }
         $.ajax({
             url: '/typefile',
-            data: {type},
+            data: { type },
             type: 'post',
             beforeSend: function (request) {
                 //将cookie中的token信息放于请求头中
                 request.setRequestHeader("token", cookieobj.user)
-                request.setRequestHeader('userid',cookieobj.login)
+                request.setRequestHeader('userid', cookieobj.login)
             },
             success: function (data) {
                 //刷新页面
-                if(data){
+                if (data) {
                     getfile(data)
-                }else{
+                } else {
                     //服务端错误
                 }
             }
@@ -213,7 +213,7 @@ $(function () {
      * 文件删除
      * ？？？文件路径(文件id)
      */
-    $('#filelist').on('click','.icon-shanchu',function (e) {
+    $('#filelist').on('click', '.icon-shanchu', function (e) {
         let filepath = $(e.target).siblings('a').attr('href')
         let fileid = $(e.target).next().text()
         $.ajax({
@@ -226,13 +226,13 @@ $(function () {
             beforeSend: function (request) {
                 //将cookie中的token信息放于请求头中
                 request.setRequestHeader("token", cookieobj.user)
-                request.setRequestHeader('userid',cookieobj.login)
+                request.setRequestHeader('userid', cookieobj.login)
             },
             success: function (data) {
                 //刷新页面
-                if(data){
+                if (data) {
                     getfile()
-                }else{
+                } else {
                     //服务端错误
                 }
             }
@@ -268,5 +268,84 @@ $(function () {
             }
         })
     })
+
+
+    /**
+     * 表格部分
+     */
+    //图表类型选择
+    $('#charttype').click(function () {
+        $('.chartbox').stop().slideToggle()
+    })
+
+    $('#charttypelist').on('click', 'li', function (e) {
+        $('.chartbox').stop().slideToggle()
+        $('#charttype').text($(e.target).text())
+    })
+
+    //编辑图表
+    $('#addcol').click(function () {
+        let textcol = "<th><input type='text'></th>"
+        let textrow = "<td><input type='text'></td>"
+        $('.editcol').append(textcol)
+        $('.editrow').append(textrow)
+    })
+
+    $('#addrow').click(function () {
+        let tr = document.createElement('tr')
+        let td = document.createElement('td')
+        let input = document.createElement('input')
+        $(td).append(input)
+        for (let i = 0; i < $('.editcol').children('th').length; i++) {
+            $(tr).append($(td).clone())
+        }
+        tr.className = 'editrow'
+        $('#edittable').append(tr)
+    })
+
+    //添加表保存
+    $('#saveeditor').click(function () {
+        //获取输入数据
+        let tableobj = {}
+        tableobj.tablename = $('#edittable').children('caption').find('input').val()
+        tableobj.field = []
+        tableobj.rowdata = []
+        for (let i = 0; i < $('.editcol').children('th').length; i++) {
+            tableobj.field.push($($('.editcol').find('input')[i]).val())
+        }
+        for (let i = 0; i < $('#edittable').children('tbody').find('.editrow').length; i++) {
+            let obj = {}
+            for (let j = 0; j < $('.editcol').children('th').length; j++) {
+                obj[tableobj.field[j]] = $($($('.editrow')[i]).find('input')[j]).val()
+            }
+            tableobj.rowdata.push(obj)
+        }
+        let obj = JSON.stringify(tableobj)
+        if(tableobj.tablename){
+            $.ajax({
+                url: '/addtable',
+                data: obj,
+                dataType: "json",
+                // traditional: true,
+                type: 'post',
+                contentType: 'application/json',
+                beforeSend: function (request) {
+                    //将cookie中的token信息放于请求头中
+                    request.setRequestHeader("userid", cookieobj.login);
+                    request.setRequestHeader("token", cookieobj.user);
+                },
+                success: function (data) {
+                    //添加表格成功，显示当前表
+                    console.log(data)
+                }
     
+            })
+        }else{
+            //表名不能为空
+            console.log('表名不能为空')
+        }
+            
+        
+    })
+
 })

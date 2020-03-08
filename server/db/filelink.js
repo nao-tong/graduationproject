@@ -53,8 +53,7 @@ function addUser(userid, callback) {
 function addField(tablename, field, callback) {
     connectdb();
     connection.connect();
-    connection.query('ALTER TABLE ' + tablename +
-        ' ADD ' + field + ' VARCHAR(255)',
+    connection.query('ALTER TABLE ' + tablename + ' ADD ' + field + ' VARCHAR(255)',
         function (error, results, fields) {
             if (error) throw error;
             callback(results.protocol41);

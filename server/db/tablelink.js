@@ -17,12 +17,33 @@ var connectdb = function () {
     });
 }
 
+//查询所有
+function findAll(callback) {
+    connectdb();
+    connection.connect();
+    connection.query('SELECT * FROM tablelink', function (error, results, fields) {
+        if (error) throw error;
+        callback(JSON.parse(JSON.stringify(results)));
+    });
+    connection.end();
+}
+
+//查询一个
+function findOne(userid, callback) {
+    connectdb();
+    connection.connect();
+    connection.query('SELECT * FROM tablelink WHERE userid = ' + '"' + userid + '"', function (error, results, fields) {
+        if (error) throw error;
+        callback(JSON.parse(JSON.stringify(results))[0]);
+    });
+    connection.end();
+}
 
 //添加用户id
 function addUser(userid, callback) {
     connectdb();
     connection.connect();
-    connection.query('INSERT INTO linktable (userid) VALUES (' +'"'+ userid +'"'+ ')', function (error, results, fields) {
+    connection.query('INSERT INTO tablelink (userid) VALUES (' +'"'+ userid +'"'+ ')', function (error, results, fields) {
         if (error) throw error;
         callback(results.affectedRows);
     });
@@ -67,10 +88,37 @@ function descTable(tablename,callback){
     connection.end();
 }
 
+//封装判断字段是否为空（返回第一个为空的字段）
+function judgeField(userid, callback) {
+    connectdb();
+    connection.connect();
+    connection.query('',
+        function (error, results, fields) {
+            if (error) throw error;
+            callback(JSON.parse(JSON.stringify(results)));
+        });
+    connection.end();
+}
+
+//更新数据(id必要)
+function upDate(tableobj, callback) {
+    connectdb();
+    connection.connect();
+    connection.query('UPDATE tablelink SET ' + tableobj.field + '= ' + '"' + tableobj.tablename + '"' + ' WHERE userid = ' + '"' + tableobj.userid + '"', function (error, results, fields) {
+        if (error) throw error;
+        callback(results.affectedRows)
+    });
+    connection.end();
+}
+
 exports.addUser = addUser
 exports.addField = addField
 exports.deleteField = deleteField
 exports.descTable = descTable
+exports.findAll = findAll
+exports.findOne = findOne
+exports.judgeField = judgeField
+exports.upDate = upDate
 
 
 

@@ -85,17 +85,17 @@
             z-index: 100;
         }
 
-        div.information div.userxiala{
+        div.information div.userxiala {
             cursor: pointer;
             padding: 5px 0;
             border-radius: 5px;
         }
 
-        div.information div.userxiala:hover{
+        div.information div.userxiala:hover {
             background-color: #ccc;
         }
 
-        div.information div.user-username{
+        div.information div.user-username {
             width: 100%;
             height: 20px;
             padding: 5px 0;
@@ -104,7 +104,7 @@
             line-height: 20px;
         }
 
-        div.information span{
+        div.information span {
             width: 100%;
             height: 100%;
             font-size: 13px;
@@ -180,7 +180,7 @@
             border: none;
         }
 
-        .content .file .bottom div.top span{
+        .content .file .bottom div.top span {
             display: inline-block;
             padding-left: 20px;
         }
@@ -219,13 +219,13 @@
             color: black;
         }
 
-        .content .file .bottom ul li span i.icon-shanchu{
+        .content .file .bottom ul li span i.icon-shanchu {
             position: absolute;
             right: 7%;
             cursor: pointer;
         }
 
-        .content .file .bottom ul li span i.fileid{
+        .content .file .bottom ul li span i.fileid {
             display: none;
         }
 
@@ -260,7 +260,27 @@
             display: none;
         }
 
+        .content .addtable {
+            display: none;
+        }
+
+        .content .addtable .usertable table tr th input {
+            width: 90%;
+            height: 90%;
+        }
+
+        .content .addtable .usertable table tr td input {
+            width: 90%;
+            height: 90%;
+        }
+
+        .content .addtable .top #saveeditor {
+            position: absolute;
+            right: 20px;
+        }
+
         .upl {
+            cursor: pointer;
             display: inline-block;
             width: 84px;
             height: 34px;
@@ -271,10 +291,6 @@
             text-align: center;
             line-height: 34px;
             border-radius: 4px;
-        }
-
-        #delete {
-            cursor: pointer;
         }
 
         #avater {
@@ -288,7 +304,17 @@
             border-radius: 4px;
         }
 
+        #uploadfile {
+            width: 100%;
+            height: 100%;
+        }
+
         #delete {
+            position: absolute;
+            right: 20px;
+        }
+
+        #deletetable {
             position: absolute;
             right: 20px;
         }
@@ -344,13 +370,29 @@
         .chartbox ul li a.chart {
             color: white;
         }
+
+        .bottom .chart {
+            display: none;
+        }
+
+        .bottom div.formbox {
+            margin-left: 4%;
+        }
     </style>
     <script src="/public/js/echarts.min.js"></script>
 </head>
 
 <body>
     <div class="nav">
-        <marquee behavior="scroll" direction="left" style="width:85%;">富强,民主,文明,和谐,自由,平等,公正,法治</marquee>
+        <marquee behavior="scroll" direction="left" style="width:85%;color:red;font-size: 18px;">
+            实验室注意事项：
+            1、不得将饮料和事物带入化学实验室,.实验室内禁止吸烟
+            2、请保持室内卫生.
+            3、废纸请扔进废纸篓里.
+            4、未经许可不得触摸任何物品
+            5、做完试验后物品必须放回原位
+            6、离开前必须关闭门窗
+        </marquee>
         <img src="" alt="headimg" id="headimg">
         <span class="updata">用户管理</span>
         <div class="information" id="information">
@@ -392,10 +434,10 @@
                 <form id="avater" action="/upload" method="post" enctype="multipart/form-data">
                     <input type="file" name="avatar" id="uploadfile" />
                 </form>
-                <span class="upl delete" id="delete">删除文件</span>
+                <span class="upl delete" id="delete">全部文件</span>
                 <div class="seach">
                     <input type="text" class="seachdata">
-                    <span class="iconfont icon-tubiao-"></span>
+                    <span class="iconfont icon-tubiao- seachfile"></span>
                 </div>
             </div>
 
@@ -415,11 +457,12 @@
 
         <div class="sidebar right form" id="displaytable">
             <div class="top">
-                <a href="#" class="upl" id="upload">添加表</a>
-                <a href="#" class="upl" id="charttype">图表类型</a>
-                <a href="#" class="upl" id="delete">删除表</a>
+                <span class="upl" id="upload">添加表</span>
+                <span class="upl" id="editor">编辑表</span>
+                <span class="upl" id="charttype">图表类型</span>
+                <span class="upl" id="deletetable">删除表</span>
                 <div class="chartbox">
-                    <ul>
+                    <ul id="charttypelist">
                         <li class="chart "><a href="#" class="chart">折线图</a></li>
                         <li class="chart "><a href="#" class="chart">饼状图</a></li>
                         <li class="chart "><a href="#" class="chart">柱状图</a></li>
@@ -428,11 +471,12 @@
                 </div>
                 <div class="seach">
                     <input type="text" class="seachdata">
-                    <span class="iconfont icon-tubiao-"></span>
+                    <span class="iconfont icon-tubiao- seachform"></span>
                 </div>
             </div>
 
-            <div class="bottom">
+            <!--  -->
+            <div class="bottom usertable">
                 <!-- 1、数据表的删除
                      2、数据更新
                      3、自动追加更新时间
@@ -441,8 +485,8 @@
                      删除数据表（数据）后自动发请求刷新用户表
                 -->
 
-                <!-- table -->
-                <div>
+                <!-- 表格 -->
+                <div class="formbox">
                     <table border="1" frame="void" cellspacing="0" rules="groups">
                         <caption>表1</caption>
                         <tr>
@@ -489,82 +533,120 @@
                         </tr>
                     </table>
                 </div>
+                <!-- 图表 -->
+                <div class="chart" id="chart" style="width:600px;height:300px;"></div>
             </div>
-            <div class="chart" id="chart" style="width:600px;height:300px;"></div>
-            <script type="text/javascript">
-                // 基于准备好的dom，初始化echarts实例
-                var myChart = echarts.init(document.getElementById('chart'));
 
-                // 指定图表的配置项和数据
-                var option = {
-                    title: {
-                        text: '折线图堆叠'
-                    },
-                    tooltip: {
-                        trigger: 'axis'
-                    },
-                    legend: {
-                        data: ['邮件营销', '联盟广告', '视频广告', '直接访问', '搜索引擎']
-                    },
-                    grid: {
-                        left: '3%',
-                        right: '4%',
-                        bottom: '3%',
-                        containLabel: true
-                    },
-                    toolbox: {
-                        feature: {
-                            saveAsImage: {}
-                        }
-                    },
-                    xAxis: {
-                        type: 'category',
-                        boundaryGap: false,
-                        data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
-                    },
-                    yAxis: {
-                        type: 'value'
-                    },
-                    series: [
-                        {
-                            name: '邮件营销',
-                            type: 'line',
-                            stack: '总量',
-                            data: [120, 132, 101, 134, 90, 230, 210]
-                        },
-                        {
-                            name: '联盟广告',
-                            type: 'line',
-                            stack: '总量',
-                            data: [220, 182, 191, 234, 290, 330, 310]
-                        },
-                        {
-                            name: '视频广告',
-                            type: 'line',
-                            stack: '总量',
-                            data: [150, 232, 201, 154, 190, 330, 410]
-                        },
-                        {
-                            name: '直接访问',
-                            type: 'line',
-                            stack: '总量',
-                            data: [320, 332, 301, 334, 390, 330, 320]
-                        },
-                        {
-                            name: '搜索引擎',
-                            type: 'line',
-                            stack: '总量',
-                            data: [820, 932, 901, 934, 1290, 1330, 1320]
-                        }
-                    ]
-                };
 
-                // 使用刚指定的配置项和数据显示图表。
-                myChart.setOption(option);
-            </script>
+        </div>
+
+        <div class="sidebar right addtable" id="editbox">
+            <div class="top">
+                <span class="upl" id="addrow">添加行</span>
+                <span class="upl" id="addcol">添加列</span>
+                <span class="upl" id="deleteeditor">删除表</span>
+                <span class="upl" id="saveeditor">保存</span>
+            </div>
+
+            <!--  -->
+            <div class="bottom usertable">
+                <!-- 1、数据表的删除
+                     2、数据更新
+                     3、自动追加更新时间
+                     4、添加字段
+                     删除数据表（数据）后自动发请求刷新用户表
+                -->
+
+                <!-- 表格 -->
+                <div class="formbox">
+                    <table border="1" frame="void" cellspacing="0" rules="groups" id="edittable">
+                        <caption><input type="text" placeholder="请输入表名"></caption>
+                        <tr class="editcol">
+                            <th><input type="text"></th>
+                        </tr>
+                        <tr class="editrow">
+                            <td><input type="text"></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+
         </div>
     </div>
-    <!-- 模板 -->
+    <!-- 图表 -->
+    <script type="text/javascript">
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('chart'));
+
+        // 指定图表的配置项和数据
+        var option = {
+            title: {
+                text: '折线图堆叠'
+            },
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data: ['邮件营销', '联盟广告', '视频广告', '直接访问', '搜索引擎']
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            toolbox: {
+                feature: {
+                    saveAsImage: {}
+                }
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [
+                {
+                    name: '邮件营销',
+                    type: 'line',
+                    stack: '总量',
+                    data: [120, 132, 101, 134, 90, 230, 210]
+                },
+                {
+                    name: '联盟广告',
+                    type: 'line',
+                    stack: '总量',
+                    data: [220, 182, 191, 234, 290, 330, 310]
+                },
+                {
+                    name: '视频广告',
+                    type: 'line',
+                    stack: '总量',
+                    data: [150, 232, 201, 154, 190, 330, 410]
+                },
+                {
+                    name: '直接访问',
+                    type: 'line',
+                    stack: '总量',
+                    data: [320, 332, 301, 334, 390, 330, 320]
+                },
+                {
+                    name: '搜索引擎',
+                    type: 'line',
+                    stack: '总量',
+                    data: [820, 932, 901, 934, 1290, 1330, 1320]
+                }
+            ]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+        myChart.setOption(option);
+    </script>
+    <!-- 文件显示模板 -->
     <script id="test" type="text/html">
         {{each list as value i}}
             <li>
@@ -592,4 +674,5 @@
     <script src="/node_modules/jquery/dist/jquery.min.js"></script>
     <script src="/public/js/personpage.js"></script>
 </body>
+
 </html>
