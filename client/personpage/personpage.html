@@ -378,6 +378,19 @@
         .bottom div.formbox {
             margin-left: 4%;
         }
+
+        .warning {
+            display: none;
+            position: absolute;
+            left: 43%;
+            bottom: 10%;
+            width: 150px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            border-radius: 20px;
+            background-color: #ccc;
+        }
     </style>
     <script src="/public/js/echarts.min.js"></script>
 </head>
@@ -413,7 +426,7 @@
             <div>
                 <!-- 点击显示二级菜单 -->
                 <a href="#" class="xiala files" id="xialafile">文件</a>
-                <div class="secondbox">
+                <div class="secondbox secondfile">
                     <span class="xiala second">视频</span>
                     <span class="xiala second">图片</span>
                     <span class="xiala second">文本</span>
@@ -421,9 +434,7 @@
             </div>
             <div>
                 <a href="#" class="xiala tables" id="xialatable">用户数据表</a>
-                <div class="secondbox">
-                    <a href="#" class="xiala second">表1</a>
-                    <a href="#" class="xiala second">表2</a>
+                <div class="secondbox secondtable" id="tablelist">
                 </div>
             </div>
         </div>
@@ -457,7 +468,7 @@
 
         <div class="sidebar right form" id="displaytable">
             <div class="top">
-                <span class="upl" id="upload">添加表</span>
+                <span class="upl" id="addtable">添加表</span>
                 <span class="upl" id="editor">编辑表</span>
                 <span class="upl" id="charttype">图表类型</span>
                 <span class="upl" id="deletetable">删除表</span>
@@ -471,7 +482,7 @@
                 </div>
                 <div class="seach">
                     <input type="text" class="seachdata">
-                    <span class="iconfont icon-tubiao- seachform"></span>
+                    <span class="iconfont icon-tubiao- seachtable"></span>
                 </div>
             </div>
 
@@ -486,52 +497,7 @@
                 -->
 
                 <!-- 表格 -->
-                <div class="formbox">
-                    <table border="1" frame="void" cellspacing="0" rules="groups">
-                        <caption>表1</caption>
-                        <tr>
-                            <th>123</th>
-                            <th>234</th>
-                            <th>234</th>
-                            <th>234</th>
-                        </tr>
-                        <tr>
-                            <td>ndalkd</td>
-                            <td>12345</td>
-                            <td>ndalkd</td>
-                            <td>12345</td>
-                        </tr>
-                        <tr>
-                            <td>ndalkd</td>
-                            <td>12345</td>
-                            <td>ndalkd</td>
-                            <td>12345</td>
-                        </tr>
-                        <tr>
-                            <td>ndalkd</td>
-                            <td>12345</td>
-                            <td>ndalkd</td>
-                            <td>12345</td>
-                        </tr>
-                        <tr>
-                            <td>ndalkd</td>
-                            <td>12345</td>
-                            <td>ndalkd</td>
-                            <td>12345</td>
-                        </tr>
-                        <tr>
-                            <td>ndalkd</td>
-                            <td>12345</td>
-                            <td>ndalkd</td>
-                            <td>12345</td>
-                        </tr>
-                        <tr>
-                            <td>ndalkd</td>
-                            <td>12345</td>
-                            <td>ndalkd</td>
-                            <td>12345</td>
-                        </tr>
-                    </table>
+                <div class="formbox" id="tablebox">
                 </div>
                 <!-- 图表 -->
                 <div class="chart" id="chart" style="width:600px;height:300px;"></div>
@@ -574,6 +540,7 @@
 
         </div>
     </div>
+    <div class="warning"></div>
     <!-- 图表 -->
     <script type="text/javascript">
         // 基于准备好的dom，初始化echarts实例
@@ -646,7 +613,33 @@
         // 使用刚指定的配置项和数据显示图表。
         myChart.setOption(option);
     </script>
-    <!-- 文件显示模板 -->
+    <!-- 模板 -->
+    <script id="nowtable" type="text/html">
+        <table border="1" frame="void" cellspacing="0" rules="groups">
+            {{ if typeof(list.tablename) == 'object' }}
+            <caption>{{ list.tablename[0] }}</caption>
+            {{ else }}
+            <caption>{{ list.tablename }}</caption>
+            {{ /if }}
+            <tr>
+                {{ each list.tablefield as value i }}
+                <th>{{ value }}</th>
+                {{ /each }}
+            </tr>
+            {{ each list.table as item i }}
+            <tr>
+                {{ each list.tablefield as value i }}
+                <td>{{ item[value] }}</td>
+                {{ /each }}
+            </tr>
+            {{ /each }}
+        </table>
+    </script>
+    <script id="secondboxtable" type="text/html">
+        {{each list as value i}}
+        <span class="xiala second">{{ value }}</span>
+        {{/each}}
+    </script>
     <script id="test" type="text/html">
         {{each list as value i}}
             <li>

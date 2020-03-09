@@ -42,6 +42,18 @@ function addField(tablename, field, callback) {
     connection.end();
 }
 
+//获取表字段
+function descTable(tablename, callback) {
+    connectdb();
+    connection.connect();
+    connection.query('desc ' + tablename + ';',
+        function (error, results, fields) {
+            if (error) throw error;
+            callback(JSON.parse(JSON.stringify(results)));
+        });
+    connection.end();
+}
+
 //插入数据
 function addData(tablename, tableobj, callback) {
     let str = 'INSERT INTO tablename (field) VALUES (value)'
@@ -93,7 +105,7 @@ function upDate(tabledata, callback) {
 function findAll(tablename, callback) {
     connectdb();
     connection.connect();
-    connection.query('SELECT * FROM' + tablename, function (error, results, fields) {
+    connection.query('SELECT * FROM ' + tablename, function (error, results, fields) {
         if (error) throw error;
         callback(JSON.parse(JSON.stringify(results)));
     });
@@ -106,3 +118,4 @@ exports.addField = addField
 exports.addData = addData
 exports.upDate = upDate
 exports.findAll = findAll
+exports.descTable = descTable

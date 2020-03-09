@@ -691,6 +691,9 @@ user.post('/typefile', function (req, res) {
                                 }
                             } else if (data.filetype != type) {
                                 //不符合文件类型
+                                if (j == arr.length) {
+                                    res.send(filemessage)
+                                }
                             } else {
                                 let dt = data
                                 let date = new Date(Number(dt.updt))
@@ -762,6 +765,9 @@ user.post('/queryfile', function (req, res) {
                                 }
                             } else if (data.filename.split('-')[2].split('.')[0].indexOf(message) == -1) {
                                 //不符合文件类型
+                                if (j == arr.length) {
+                                    res.send(filemessage)
+                                }
                             } else {
                                 let dt = data
                                 let date = new Date(Number(dt.updt))
@@ -801,14 +807,118 @@ user.post('/queryfile', function (req, res) {
 
 //获取用户创建的所有表?
 user.post('/alltable', function (req, res) {
+    //用户id
+    let result = {}
+    result.tablefield = []
+    result.tablename = []
+    let userid = aes.Decrypt(req.body.userid)
+    new Promise(function(resolve,reject){
+        tablelink.findOne(userid,function(data){
+            let num = 0
+            for (let item in data) {
+                num++
+                if (item == 'userid') {
+                    continue
+                } else {
+                    result.tablename.push(data[item])
+                    if (num == Object.keys(data).length) {
+                        resolve(result.tablename[0])
+                    }
+                }
+            }
+        })
+    })
+    .then(function(data){
+        let tablename = data
+        new Promise(function(resolve,reject){
+            createtable.descTable(tablename,function(data){
+                if(data){
+                    for(let i = 0;i<data.length;i++){
+                        if(data[i].Field == 'serial'){
+                            continue
+                        }
+                        result.tablefield.push(data[i].Field)
+                    }
+                    resolve()
+                }
+            })
+        })
+        .then(function(){
+            createtable.findAll(tablename,function(dt){
+                result.table = dt
+                res.send(result)
+            })
+        })
+        
+    },function(){
 
+    })
 })
 
-//添加表?
+//获取当前表格数据
+user.post('/nowtabledata',function(req,res){
+    /**
+     * 必要：
+     * 1、表名
+     * 2、用户id
+     * 先进行表名查询，再进行表格查询
+     */
+    let result = {}
+    result.tablefield = []
+    let userid = aes.Decrypt(req.headers.userid)
+    let tablename = req.body.tablename
+    result.tablename = tablename
+    new Promise(function(resolve,reject){
+        tablelink.findOne(userid,function(data){
+            let num = 0
+            for (let item in data) {
+                num++
+                if (item == 'userid') {
+                    continue
+                } else {
+                    if(data[item] == tablename){
+                        resolve(data[item])
+                        break
+                    }
+                }
+            }
+        })
+    })
+    .then(function(data){
+        let tablename = data
+        new Promise(function(resolve,reject){
+            createtable.descTable(tablename,function(data){
+                if(data){
+                    for(let i = 0;i<data.length;i++){
+                        if(data[i].Field == 'serial'){
+                            continue
+                        }
+                        result.tablefield.push(data[i].Field)
+                    }
+                    resolve()
+                }
+            })
+        })
+        .then(function(){
+            createtable.findAll(data,function(dt){
+                result.table = dt
+                res.send(result)
+            })
+        },function(){
+
+        })
+        
+    },function(){
+
+    })
+})
+
+//添加表?？？？？？？待完善
 user.post('/addtable', function (req, res) {
     let result = {}
     let tableobj = {}
-    tableobj.userid = aes.Decrypt(req.headers.userid)
+    let userid = aes.Decrypt(req.headers.userid)
+    tableobj.userid = userid
     let tablename = req.body.tablename
     tableobj.tablename = tablename
     let field = req.body.field
@@ -828,23 +938,24 @@ user.post('/addtable', function (req, res) {
                     arr.push(data[i].Field)
                 }
             }
+            //arr
             if (arr.length) {
                 new Promise(function (resolve, reject) {
                     tablelink.findOne(userid, function (data) {
                         if (data) {
-                            let field = {}
+                            let obj = {}
                             for (let i = 0; i < arr.length; i++) {
                                 if (!data[arr[i]]) {
                                     //查询到空字段
-                                    field.empty = arr[i]
+                                    obj.empty = arr[i]
                                     tableobj.field = arr[i]
-                                    resolve(field)
+                                    resolve(obj)
                                     break
                                 } else {
                                     if (i == arr.length - 1) {
                                         //没有空字段,需要增加字段
-                                        field.empty = false
-                                        resolve(field)
+                                        obj.empty = false
+                                        resolve(obj)
                                     }
                                 }
                             }
@@ -857,7 +968,7 @@ user.post('/addtable', function (req, res) {
                     .then(function (data) {
                         if (data.empty) {
                             //有空字段
-                            tablelink.upDate(fileobj, function () {
+                            tablelink.upDate(tableobj, function (data) {
                                 //字段添加成功后添加表格信息????
                                 addTable(tablename,field,rowdata)
                             })

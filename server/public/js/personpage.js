@@ -1,3 +1,4 @@
+//cookie解析
 function alaysisCookie(cookie) {
     var group = cookie.split(';')
     var object = {}
@@ -7,6 +8,30 @@ function alaysisCookie(cookie) {
         object[key] = value;
     }
     return object;
+}
+
+// 对函数进行 节流
+function throttle(fn, interval = 500) {
+    let timer = null;
+    let firstTime = true;
+
+    return function (...args) {
+        if (firstTime) {
+            // 第一次加载
+            fn.apply(this, args);
+            return firstTime = false;
+        }
+        if (timer) {
+            // 定时器正在执行中，跳过
+            console.log('定时器正在执行中，跳过')
+            return;
+        }
+        timer = setTimeout(() => {
+            clearTimeout(timer);
+            timer = null;
+            fn.apply(this, args);
+        }, interval);
+    };
 }
 
 class Cookie {
@@ -43,6 +68,8 @@ if (!cookieobj.login) {
 
 $(function () {
 
+    let olddate = new Date().getTime()
+
     function getfile(dt) {
         if (dt) {
             var data = {
@@ -73,6 +100,32 @@ $(function () {
 
     }
 
+    function gettable() {
+        $.ajax({
+            url: "/alltable",
+            dataType: "json",
+            type: "post",
+            data: { userid: cookieobj.login },
+            beforeSend: function (request) {
+                //将cookie中的token信息放于请求头中
+                request.setRequestHeader("token", cookieobj.user);
+            },
+            success: function (res) {
+                //表格信息
+                var table = {
+                    list: res
+                }
+                var data = {
+                    list: res.tablename
+                }
+                var html = template('secondboxtable', data)
+                var tablehtml = template('nowtable', table)
+                document.getElementById('tablebox').innerHTML = tablehtml
+                document.getElementById('tablelist').innerHTML = html
+            }
+        })
+    }
+
     $.ajax({
         url: "/datauser",
         dataType: "json",
@@ -89,6 +142,9 @@ $(function () {
             $('.username').text(res.username)
         }
     })
+    //获取表格信息
+
+    gettable()
     getfile()
 
     //头像下拉信息
@@ -113,7 +169,7 @@ $(function () {
             time: 0,
             path: "/"
         })
-        location.replace(location.href)
+        location.replace('/')
     })
 
     //修改信息
@@ -130,18 +186,27 @@ $(function () {
         $('.xiala').removeClass('active')
         $('.files').addClass('active')
         $('.files').siblings().stop().slideToggle()
-        $('.addtable').css('display', 'none')
         $('.file').css('display', 'block')
+        $('.addtable').css('display', 'none')
+        $('.form').css('display', 'none')
+        getfile()
     })
 
     $('.tables').click(function () {
         $('.xiala').removeClass('active')
         $('.tables').addClass('active')
         $('.tables').siblings().stop().slideToggle()
+        $('.form').css('display', 'block')
         $('.file').css('display', 'none')
-        $('.addtable').css('display', 'block')
+        $('.addtable').css('display', 'none')
+        gettable()
     })
 
+    $('#addtable').click(function () {
+        $('.addtable').css('display', 'block')
+        $('.form').css('display', 'none')
+        $('.file').css('display', 'none')
+    })
 
 
 
@@ -154,12 +219,66 @@ $(function () {
     //文件搜索
     $('.seachfile').click(function () {
         let message = $('.seachdata').val()
+        let nowdate = new Date().getTime()
+        let datesub = nowdate - olddate
+        olddate = nowdate
         if (!message) {
             $('.seachdata').val('请输入关键信息')
         } else {
+            if (datesub < 500) {
+                $('.warning').css('display', 'block')
+                $('.warning').text('操作频繁')
+                setTimeout(function () {
+                    $('.warning').css('display', 'none')
+                }, 1000)
+            } else {
+                $.ajax({
+                    url: '/queryfile',
+                    data: { message },
+                    type: 'post',
+                    beforeSend: function (request) {
+                        //将cookie中的token信息放于请求头中
+                        request.setRequestHeader("token", cookieobj.user)
+                        request.setRequestHeader('userid', cookieobj.login)
+                    },
+                    success: function (data) {
+                        //刷新页面
+                        if (data) {
+                            getfile(data)
+                        } else {
+                            //服务端错误
+                        }
+                    }
+                })
+            }
+
+        }
+    })
+
+    //分类文件
+    $('.secondfile').on('click', 'span', function (e) {
+        let nowdate = new Date().getTime()
+        let datesub = nowdate - olddate
+        olddate = nowdate
+        let filetype = $(e.target).text()
+        let type
+        if (filetype == '视频') {
+            type = 'video'
+        } else if (filetype == '图片') {
+            type = 'image'
+        } else {
+            type = 'text'
+        }
+        if (datesub < 500) {
+            $('.warning').css('display', 'block')
+            $('.warning').text('操作频繁')
+            setTimeout(function () {
+                $('.warning').css('display', 'none')
+            }, 1000)
+        } else {
             $.ajax({
-                url: '/queryfile',
-                data: { message },
+                url: '/typefile',
+                data: { type },
                 type: 'post',
                 beforeSend: function (request) {
                     //将cookie中的token信息放于请求头中
@@ -176,37 +295,7 @@ $(function () {
                 }
             })
         }
-    })
 
-    //分类文件
-    $('.secondbox').on('click', 'span', function (e) {
-        let filetype = $(e.target).text()
-        let type
-        if (filetype == '视频') {
-            type = 'video'
-        } else if (filetype == '图片') {
-            type = 'image'
-        } else {
-            type = 'text'
-        }
-        $.ajax({
-            url: '/typefile',
-            data: { type },
-            type: 'post',
-            beforeSend: function (request) {
-                //将cookie中的token信息放于请求头中
-                request.setRequestHeader("token", cookieobj.user)
-                request.setRequestHeader('userid', cookieobj.login)
-            },
-            success: function (data) {
-                //刷新页面
-                if (data) {
-                    getfile(data)
-                } else {
-                    //服务端错误
-                }
-            }
-        })
     })
 
     /**
@@ -248,7 +337,6 @@ $(function () {
     $('#uploadfile').change(function () {
         let fileform = new FormData(document.getElementById('avater'))
         let file = document.getElementById('uploadfile').files[0]
-        console.log(file)
         $.ajax({
             url: '/uploadfile',
             data: fileform,
@@ -321,7 +409,7 @@ $(function () {
             tableobj.rowdata.push(obj)
         }
         let obj = JSON.stringify(tableobj)
-        if(tableobj.tablename){
+        if (tableobj.tablename) {
             $.ajax({
                 url: '/addtable',
                 data: obj,
@@ -336,16 +424,85 @@ $(function () {
                 },
                 success: function (data) {
                     //添加表格成功，显示当前表
-                    console.log(data)
+                    $('.form').css('display', 'block')
+                    $('.file').css('display', 'none')
+                    $('.addtable').css('display', 'none')
+                    gettable()
+                }
+
+            })
+        } else {
+            //表名不能为空
+            $('.warning').css('display', 'block')
+            $('.warning').text('表名不能为空')
+            setTimeout(function () {
+                $('.warning').css('display', 'none')
+            }, 1000)
+        }
+
+
+    })
+
+    //左侧下拉选择表格
+    $('#tablelist').on('click', 'span', function (e) {
+        let nowdate = new Date().getTime()
+        let datesub = nowdate - olddate
+        olddate = nowdate
+        let tablename = $(e.target).text()
+        if (datesub < 500) {
+            $('.warning').css('display', 'block')
+            $('.warning').text('操作频繁')
+            setTimeout(function () {
+                $('.warning').css('display', 'none')
+            }, 1000)
+        } else {
+            $.ajax({
+                url: '/nowtabledata',
+                data: { tablename },
+                dataType: "json",
+                type: 'post',
+                beforeSend: function (request) {
+                    //将cookie中的token信息放于请求头中
+                    request.setRequestHeader("userid", cookieobj.login);
+                    request.setRequestHeader("token", cookieobj.user);
+                },
+                success: function (data) {
+                    //显示当前表格
+                    var table = {
+                        list: data
+                    }
+                    var tablehtml = template('nowtable', table)
+                    document.getElementById('tablebox').innerHTML = tablehtml
                 }
     
             })
-        }else{
-            //表名不能为空
-            console.log('表名不能为空')
         }
-            
-        
     })
 
+    //表格搜索
+    $('.seachtable').click(function () {
+        let message = $('.seachdata').val()
+        if (!message) {
+            $('.seachdata').val('请输入关键信息')
+        } else {
+            $.ajax({
+                url: '/querytable',
+                data: { message },
+                type: 'post',
+                beforeSend: function (request) {
+                    //将cookie中的token信息放于请求头中
+                    request.setRequestHeader("token", cookieobj.user)
+                    request.setRequestHeader('userid', cookieobj.login)
+                },
+                success: function (data) {
+                    //刷新页面
+                    if (data) {
+                        getfile(data)
+                    } else {
+                        //服务端错误
+                    }
+                }
+            })
+        }
+    })
 })
