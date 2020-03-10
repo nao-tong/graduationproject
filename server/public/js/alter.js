@@ -134,6 +134,7 @@ $(function () {
                     if (dt.password) {
                         if(dt.account){
                             $('#error').text('修改成功');
+                            location.replace('/user/personpage')
                         }else{
                             $('#error').text('修改失败');
                         }
@@ -149,7 +150,6 @@ $(function () {
     //上传头像
     $('#headimage').change(function () {
         let img = document.getElementById('headimage');
-        console.log(img.files)
         let filetype = img.files[0].name.split('.')[1];
         if (filetype == 'jpg' || filetype == 'png') {
             let imgform = new FormData(document.getElementById('avater'))
@@ -182,7 +182,6 @@ $(function () {
         },
         success: function (res) {
             //个人信息
-            console.log(res)
             $('#headimgid').attr('src', res.headimg);
             $('#username').val(res.userid)
             $('#nickname').val(res.username)

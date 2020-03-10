@@ -99,7 +99,6 @@ $(function () {
     //上传头像
     $('#headimage').change(function(){
         let img = document.getElementById('headimage');
-        console.log(img.files)
         let filetype = img.files[0].name.split('.')[1];
         if(filetype == 'jpg' || filetype == 'png'){
             let imgform = new FormData(document.getElementById('avater'))

@@ -131,6 +131,7 @@
         }
 
         .content .left .xiala {
+            cursor: pointer;
             display: block;
             width: 100%;
             height: 42px;
@@ -140,6 +141,11 @@
 
         .content .left .xiala:hover {
             background-color: #cccccc;
+        }
+
+        .content .left .secondtable {
+            height: 510px;
+            overflow: auto;
         }
 
         .content .left .second {
@@ -396,8 +402,8 @@
 </head>
 
 <body>
-    <div class="nav">
-        <marquee behavior="scroll" direction="left" style="width:85%;color:red;font-size: 18px;">
+    <div class="nav" id="nav">
+        <!-- <marquee behavior="scroll" direction="left" style="width:85%;color:red;font-size: 18px;">
             实验室注意事项：
             1、不得将饮料和事物带入化学实验室,.实验室内禁止吸烟
             2、请保持室内卫生.
@@ -419,13 +425,13 @@
             <div class="userxiala exit" id="exit">
                 <span>退出</span>
             </div>
-        </div>
+        </div> -->
     </div>
     <div class="content">
         <div class="sidebar left">
             <div>
                 <!-- 点击显示二级菜单 -->
-                <a href="#" class="xiala files" id="xialafile">文件</a>
+                <span class="xiala files" id="xialafile">文件</span>
                 <div class="secondbox secondfile">
                     <span class="xiala second">视频</span>
                     <span class="xiala second">图片</span>
@@ -433,7 +439,7 @@
                 </div>
             </div>
             <div>
-                <a href="#" class="xiala tables" id="xialatable">用户数据表</a>
+                <span class="xiala tables" id="xialatable">用户数据表</span>
                 <div class="secondbox secondtable" id="tablelist">
                 </div>
             </div>
@@ -614,6 +620,48 @@
         myChart.setOption(option);
     </script>
     <!-- 模板 -->
+    <script id="edit" type="text/html">
+        <caption><input type="text" placeholder="请输入表名" value="{{ list.tablename }}"></caption>
+        <tr class="editcol">
+            {{ each list.field as value i }}
+            <th><input type="text" value="{{ value }}"></th>
+            {{ /each }}
+        </tr>
+        {{ each list.rowdata as item i }}
+        <tr class="editrow">
+            {{ each list.field as value i }}
+            <td><input type="text" value="{{ item[value] }}"></td>
+            {{ /each }}
+        </tr>
+        {{ /each }}
+    </script>
+    <script id="navdata" type="text/html">
+        <marquee behavior="scroll" direction="left" style="width:85%;color:red;font-size: 18px;">
+            实验室注意事项：
+            1、不得将饮料和事物带入化学实验室,.实验室内禁止吸烟
+            2、请保持室内卫生.
+            3、废纸请扔进废纸篓里.
+            4、未经许可不得触摸任何物品
+            5、做完试验后物品必须放回原位
+            6、离开前必须关闭门窗
+        </marquee>
+        <img src="{{ list.headimg }}" alt="headimg" id="headimg">
+        {{ if list.admin == 0 }}
+        <span class="updata">用户管理</span>
+        {{ /if }}
+        <div class="information" id="information">
+            <div class="user-username">
+                <span>昵称：</span>
+                <span class="username">{{ list.username }}</span>
+            </div>
+            <div class="userxiala persondate" id="persondate">
+                <span>个人信息</span>
+            </div>
+            <div class="userxiala exit" id="exit">
+                <span>退出</span>
+            </div>
+        </div>
+    </script>
     <script id="nowtable" type="text/html">
         <table border="1" frame="void" cellspacing="0" rules="groups">
             {{ if typeof(list.tablename) == 'object' }}
@@ -621,13 +669,13 @@
             {{ else }}
             <caption>{{ list.tablename }}</caption>
             {{ /if }}
-            <tr>
+            <tr class="col">
                 {{ each list.tablefield as value i }}
                 <th>{{ value }}</th>
                 {{ /each }}
             </tr>
             {{ each list.table as item i }}
-            <tr>
+            <tr class="row">
                 {{ each list.tablefield as value i }}
                 <td>{{ item[value] }}</td>
                 {{ /each }}
@@ -652,7 +700,11 @@
                     {{ else }}
                     <i class="iconfont icon-icon fileicon"></i>
                     {{ /if }}
+                    {{ if value.filetype == 'image'}}
+                    <a href="{{ value.filepath }}"><span class="name">{{ value.filename }}</span></a>
+                    {{ else }}
                     <span class="name">{{ value.filename }}</span>
+                    {{ /if }}
                     <a href="{{ value.filepath }}" class="download" download="{{ value.fullname }}"><i class="iconfont icon-xiazai"></i></a>
                     <i class="iconfont icon-shanchu"></i>
                     <i class="fileid">{{ value.fileid }}</i>

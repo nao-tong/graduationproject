@@ -10,30 +10,6 @@ function alaysisCookie(cookie) {
     return object;
 }
 
-// 对函数进行 节流
-function throttle(fn, interval = 500) {
-    let timer = null;
-    let firstTime = true;
-
-    return function (...args) {
-        if (firstTime) {
-            // 第一次加载
-            fn.apply(this, args);
-            return firstTime = false;
-        }
-        if (timer) {
-            // 定时器正在执行中，跳过
-            console.log('定时器正在执行中，跳过')
-            return;
-        }
-        timer = setTimeout(() => {
-            clearTimeout(timer);
-            timer = null;
-            fn.apply(this, args);
-        }, interval);
-    };
-}
-
 class Cookie {
     constructor(cookieobj) {
         this.name = cookieobj.name;
@@ -69,6 +45,7 @@ if (!cookieobj.login) {
 $(function () {
 
     let olddate = new Date().getTime()
+    let editflag = false
 
     function getfile(dt) {
         if (dt) {
@@ -136,10 +113,14 @@ $(function () {
             request.setRequestHeader("token", cookieobj.user);
         },
         success: function (res) {
-
             //个人信息
-            $('#headimg').attr('src', res.headimg)
-            $('.username').text(res.username)
+            var data = {
+                list: res
+            }
+            var html = template('navdata', data)
+            document.getElementById('nav').innerHTML = html
+            // $('#headimg').attr('src', res.headimg)
+            // $('.username').text(res.username)
         }
     })
     //获取表格信息
@@ -148,32 +129,32 @@ $(function () {
     getfile()
 
     //头像下拉信息
-    $('#headimg').mouseenter(function () {
+    $('#nav').on('mouseenter', '#headimg', function () {
         $('#information').css('display', 'block')
     })
-    $('#information').mouseenter(function () {
-        $('#information').css('display', 'block')
-    })
-    $('#headimg').mouseleave(function () {
+    $('#nav').on('mouseleave', '#headimg', function () {
         $('#information').css('display', 'none')
     })
-    $('#information').mouseleave(function () {
+    $('#nav').on('mouseenter', '#information', function () {
+        $('#information').css('display', 'block')
+    })
+    $('#nav').on('mouseleave', '#information', function () {
         $('#information').css('display', 'none')
     })
 
     //退出
-    $('#exit').click(function () {
+    $('#nav').on('click', '#exit', function () {
         new Cookie({
             name: "login",
             value: '',
-            time: 0,
+            time: -1,
             path: "/"
         })
         location.replace('/')
     })
 
     //修改信息
-    $('#persondate').click(function () {
+    $('#nav').on('click', '#persondate', function () {
         window.location.href = '/user/alter';
         window.navigate('/user/alter');
         window.location.replace('/user/alter');
@@ -336,7 +317,6 @@ $(function () {
      */
     $('#uploadfile').change(function () {
         let fileform = new FormData(document.getElementById('avater'))
-        let file = document.getElementById('uploadfile').files[0]
         $.ajax({
             url: '/uploadfile',
             data: fileform,
@@ -350,6 +330,23 @@ $(function () {
             contentType: false,
             //取消帮我们格式化数据，是什么就是什么   ???
             processData: false,
+            xhr: function () {
+                var xhr = new XMLHttpRequest();
+                //使用XMLHttpRequest.upload监听上传过程，注册progress事件，打印回调函数中的event事件
+                xhr.upload.addEventListener('progress', function (e) {
+                    //loaded代表上传了多少
+                    //total代表总数为多少
+                    var progressRate = (e.loaded / e.total)
+                    if (progressRate == 1) {
+                        $('.warning').css('display', 'block')
+                        $('.warning').text('上传成功')
+                        setTimeout(function () {
+                            $('.warning').css('display', 'none')
+                        }, 1000)
+                    }
+                })
+                return xhr;
+            },
             success: function (data) {
                 //刷新页面
                 getfile()
@@ -391,6 +388,33 @@ $(function () {
         $('#edittable').append(tr)
     })
 
+    $('#editor').click(function(){
+        editflag = true
+        let tableobj = {}
+        tableobj.tablename = $('caption').text()
+        tableobj.field = []
+        tableobj.rowdata = []
+        for (let i = 0; i < $('.col').children('th').length; i++) {
+            tableobj.field.push($($('.col').find('th')[i]).text())
+        }
+        for (let i = 0; i < $('#tablebox').find('tbody').find('.row').length; i++) {
+            let obj = {}
+            for (let j = 0; j < $('.col').children('th').length; j++) {
+                obj[tableobj.field[j]] = $($($('.row')[i]).find('td')[j]).text()
+            }
+            tableobj.rowdata.push(obj)
+        }
+        var table = {
+            list: tableobj
+        }
+        var tablehtml = template('edit', table)
+        $('#edittable').html(tablehtml)
+        $('.addtable').css('display', 'block')
+        $('.form').css('display', 'none')
+        $('.file').css('display', 'none')
+        // document.getElementById('#edittable').innerHTML = tablehtml
+    })
+
     //添加表保存
     $('#saveeditor').click(function () {
         //获取输入数据
@@ -410,27 +434,43 @@ $(function () {
         }
         let obj = JSON.stringify(tableobj)
         if (tableobj.tablename) {
-            $.ajax({
-                url: '/addtable',
-                data: obj,
-                dataType: "json",
-                // traditional: true,
-                type: 'post',
-                contentType: 'application/json',
-                beforeSend: function (request) {
-                    //将cookie中的token信息放于请求头中
-                    request.setRequestHeader("userid", cookieobj.login);
-                    request.setRequestHeader("token", cookieobj.user);
-                },
-                success: function (data) {
-                    //添加表格成功，显示当前表
-                    $('.form').css('display', 'block')
-                    $('.file').css('display', 'none')
-                    $('.addtable').css('display', 'none')
-                    gettable()
-                }
-
-            })
+            if(!editflag){
+                $.ajax({
+                    url: '/addtable',
+                    data: obj,
+                    dataType: "json",
+                    // traditional: true,
+                    type: 'post',
+                    contentType: 'application/json',
+                    beforeSend: function (request) {
+                        //将cookie中的token信息放于请求头中
+                        request.setRequestHeader("userid", cookieobj.login);
+                        request.setRequestHeader("token", cookieobj.user);
+                    },
+                    success: function (data) {
+                        //添加表格成功，显示当前表
+                        if(data.success){
+                            $('.form').css('display', 'block')
+                            $('.file').css('display', 'none')
+                            $('.addtable').css('display', 'none')
+                            gettable()
+                        }else{
+                            $('.warning').css('display', 'block')
+                            $('.warning').text('此表已存在')
+                            setTimeout(function () {
+                                $('.warning').css('display', 'none')
+                            }, 1000)
+                        }
+                        
+                    }
+    
+                }) 
+            }else{
+                //编辑表保存
+                console.log('编辑')
+                editflag = true
+            }
+            
         } else {
             //表名不能为空
             $('.warning').css('display', 'block')
@@ -474,7 +514,7 @@ $(function () {
                     var tablehtml = template('nowtable', table)
                     document.getElementById('tablebox').innerHTML = tablehtml
                 }
-    
+
             })
         }
     })

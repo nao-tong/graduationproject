@@ -112,10 +112,22 @@ function findAll(tablename, callback) {
     connection.end();
 }
 
+//查询该用户名下的所有表
+function findAllTable(userid,callback){
+    connectdb();
+    connection.connect();
+    connection.query('select table_name from information_schema.tables where table_schema="graduationdesign" and table_name like "%_' + userid + '"', function (error, results, fields) {
+        if (error) throw error;
+        callback(JSON.parse(JSON.stringify(results)));
+    });
+    connection.end();
+}
+
 
 exports.createTable = createTable
 exports.addField = addField
 exports.addData = addData
 exports.upDate = upDate
 exports.findAll = findAll
+exports.findAllTable = findAllTable
 exports.descTable = descTable
