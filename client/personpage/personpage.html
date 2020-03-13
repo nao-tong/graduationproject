@@ -21,6 +21,7 @@
 
         table {
             width: 80%;
+            margin-top: 20px;
         }
 
         tr {
@@ -40,6 +41,7 @@
 
         a {
             text-decoration: none;
+            color: black;
         }
 
         .nav {
@@ -118,7 +120,7 @@
 
         .content {
             width: 100%;
-            height: 15px;
+            height: 100%;
             display: flex;
             justify-content: space-between;
         }
@@ -144,7 +146,7 @@
         }
 
         .content .left .secondtable {
-            height: 510px;
+            height: 100%;
             overflow: auto;
         }
 
@@ -209,6 +211,10 @@
             display: inline-block;
             font-size: 13px;
             padding-left: 20px;
+        }
+
+        .content .file .bottom ul li span.playvideo{
+            cursor: pointer;
         }
 
         .content .file .bottom ul li span.name {
@@ -278,6 +284,11 @@
         .content .addtable .usertable table tr td input {
             width: 90%;
             height: 90%;
+        }
+
+        .content .addtable .top #notsave{
+            position: absolute;
+            right: 120px;
         }
 
         .content .addtable .top #saveeditor {
@@ -362,7 +373,7 @@
             display: none;
             position: absolute;
             width: 84px;
-            left: 99px;
+            left: 197px;
             top: 42px;
             color: white;
             background-color: royalblue;
@@ -390,8 +401,8 @@
             position: absolute;
             left: 43%;
             bottom: 10%;
-            width: 150px;
             height: 40px;
+            padding: 0 20px;
             line-height: 40px;
             text-align: center;
             border-radius: 20px;
@@ -467,8 +478,6 @@
                     <span class="s s3">修改日期</span>
                 </div>
                 <ul id="filelist"></ul>
-
-
             </div>
         </div>
 
@@ -516,7 +525,9 @@
             <div class="top">
                 <span class="upl" id="addrow">添加行</span>
                 <span class="upl" id="addcol">添加列</span>
-                <span class="upl" id="deleteeditor">删除表</span>
+                <span class="upl" id="deleterow">删除行</span>
+                <span class="upl" id="deletecol">删除列</span>
+                <span class="upl" id="notsave">不保存</span>
                 <span class="upl" id="saveeditor">保存</span>
             </div>
 
@@ -702,6 +713,8 @@
                     {{ /if }}
                     {{ if value.filetype == 'image'}}
                     <a href="{{ value.filepath }}"><span class="name">{{ value.filename }}</span></a>
+                    {{ else if value.filetype == 'video'}}
+                    <span class="name playvideo">{{ value.filename }}</span>
                     {{ else }}
                     <span class="name">{{ value.filename }}</span>
                     {{ /if }}

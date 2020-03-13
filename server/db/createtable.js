@@ -29,6 +29,18 @@ function createTable(tablename, callback) {
     connection.end();
 }
 
+//删除表
+function deleteTable(tablename,callback){
+    connectdb();
+    connection.connect();
+    connection.query('DROP TABLE ' + tablename,
+        function (error, results, fields) {
+            if (error) throw error;
+            callback(results.warningCount);
+        });
+    connection.end();
+}
+
 //添加字段
 function addField(tablename, field, callback) {
     connectdb();
@@ -125,6 +137,7 @@ function findAllTable(userid,callback){
 
 
 exports.createTable = createTable
+exports.deleteTable = deleteTable 
 exports.addField = addField
 exports.addData = addData
 exports.upDate = upDate

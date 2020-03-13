@@ -89,16 +89,24 @@ $(function () {
             },
             success: function (res) {
                 //表格信息
-                var table = {
-                    list: res
+                if(!res.message){
+                    $('.warning').css('display', 'block')
+                    $('.warning').text('请添加表格')
+                    setTimeout(function () {
+                        $('.warning').css('display', 'none')
+                    }, 1500)
+                }else{
+                    var table = {
+                        list: res
+                    }
+                    var data = {
+                        list: res.tablename
+                    }
+                    var html = template('secondboxtable', data)
+                    var tablehtml = template('nowtable', table)
+                    document.getElementById('tablebox').innerHTML = tablehtml
+                    document.getElementById('tablelist').innerHTML = html
                 }
-                var data = {
-                    list: res.tablename
-                }
-                var html = template('secondboxtable', data)
-                var tablehtml = template('nowtable', table)
-                document.getElementById('tablebox').innerHTML = tablehtml
-                document.getElementById('tablelist').innerHTML = html
             }
         })
     }
@@ -123,9 +131,7 @@ $(function () {
             // $('.username').text(res.username)
         }
     })
-    //获取表格信息
-
-    gettable()
+    //获取文件信息
     getfile()
 
     //头像下拉信息
@@ -164,23 +170,46 @@ $(function () {
 
     //左侧下拉列表
     $('.files').click(function () {
+        let nowdate = new Date().getTime()
+        let datesub = nowdate - olddate
+        olddate = nowdate
         $('.xiala').removeClass('active')
         $('.files').addClass('active')
         $('.files').siblings().stop().slideToggle()
         $('.file').css('display', 'block')
         $('.addtable').css('display', 'none')
         $('.form').css('display', 'none')
-        getfile()
+        if (datesub < 500) {
+            $('.warning').css('display', 'block')
+            $('.warning').text('操作频繁')
+            setTimeout(function () {
+                $('.warning').css('display', 'none')
+            }, 1500)
+        } else {
+            getfile()
+        }
+
     })
 
     $('.tables').click(function () {
+        let nowdate = new Date().getTime()
+        let datesub = nowdate - olddate
+        olddate = nowdate
         $('.xiala').removeClass('active')
         $('.tables').addClass('active')
         $('.tables').siblings().stop().slideToggle()
         $('.form').css('display', 'block')
         $('.file').css('display', 'none')
         $('.addtable').css('display', 'none')
-        gettable()
+        if (datesub < 500) {
+            $('.warning').css('display', 'block')
+            $('.warning').text('操作频繁')
+            setTimeout(function () {
+                $('.warning').css('display', 'none')
+            }, 1500)
+        } else {
+            gettable()
+        }
     })
 
     $('#addtable').click(function () {
@@ -211,7 +240,7 @@ $(function () {
                 $('.warning').text('操作频繁')
                 setTimeout(function () {
                     $('.warning').css('display', 'none')
-                }, 1000)
+                }, 1500)
             } else {
                 $.ajax({
                     url: '/queryfile',
@@ -255,7 +284,7 @@ $(function () {
             $('.warning').text('操作频繁')
             setTimeout(function () {
                 $('.warning').css('display', 'none')
-            }, 1000)
+            }, 1500)
         } else {
             $.ajax({
                 url: '/typefile',
@@ -279,12 +308,34 @@ $(function () {
 
     })
 
+    //视频播放
+    $('#filelist').on('click', '.playvideo', function (e) {
+        let filepath = $(e.target).siblings('a').attr('href')
+        let videotype = filepath.split('.')[1]
+        if (videotype == 'mp4') {
+            new Cookie({
+                name: "video",
+                value: filepath,
+                time: 1,
+                path: "/"
+            })
+            window.open('/user/playvideo')
+        } else {
+            $('.warning').css('display', 'block')
+            $('.warning').text('不支持此视频格式')
+            setTimeout(function () {
+                $('.warning').css('display', 'none')
+            }, 1500)
+        }
+
+    })
+
     /**
      * 文件删除
      * ？？？文件路径(文件id)
      */
     $('#filelist').on('click', '.icon-shanchu', function (e) {
-        let filepath = $(e.target).siblings('a').attr('href')
+        let filepath = $(e.target).siblings('.download').attr('href')
         let fileid = $(e.target).next().text()
         $.ajax({
             url: '/deletefile',
@@ -342,7 +393,7 @@ $(function () {
                         $('.warning').text('上传成功')
                         setTimeout(function () {
                             $('.warning').css('display', 'none')
-                        }, 1000)
+                        }, 1500)
                     }
                 })
                 return xhr;
@@ -388,7 +439,36 @@ $(function () {
         $('#edittable').append(tr)
     })
 
-    $('#editor').click(function(){
+    $('#deleterow').click(function () {
+        let rowlength = $('.editrow').length
+        if (rowlength == 1) {
+            $('.warning').css('display', 'block')
+            $('.warning').text('至少一行')
+            setTimeout(function () {
+                $('.warning').css('display', 'none')
+            }, 1500)
+        } else {
+            $('.editrow')[rowlength - 1].remove()
+        }
+    })
+
+    $('#deletecol').click(function () {
+        let fieldlength = $('.editcol').children('th').length
+        if (fieldlength == 1) {
+            $('.warning').css('display', 'block')
+            $('.warning').text('至少一列')
+            setTimeout(function () {
+                $('.warning').css('display', 'none')
+            }, 1500)
+        } else {
+            $($('.editcol').children('th')[fieldlength - 1]).remove()
+            for (let i = 0; i < fieldlength; i++) {
+                $($('.editrow').children('td')[fieldlength - 1]).remove()
+            }
+        }
+    })
+
+    $('#editor').click(function () {
         editflag = true
         let tableobj = {}
         tableobj.tablename = $('caption').text()
@@ -415,14 +495,46 @@ $(function () {
         // document.getElementById('#edittable').innerHTML = tablehtml
     })
 
+    //不保存
+    $('#notsave').click(function () {
+        $('.form').css('display', 'block')
+        $('.file').css('display', 'none')
+        $('.addtable').css('display', 'none')
+        let base = `<caption><input type="text" placeholder="请输入表名"></caption>
+            <tr class="editcol">
+                <th><input type="text"></th>
+            </tr>
+            <tr class="editrow">
+                <td><input type="text"></td>
+            </tr>`
+        $('#edittable').empty()
+        $('#edittable').append(base)
+    })
+
     //添加表保存
     $('#saveeditor').click(function () {
         //获取输入数据
         let tableobj = {}
+        let field = true
+        let numtablename = false
+        let numfield = false
         tableobj.tablename = $('#edittable').children('caption').find('input').val()
         tableobj.field = []
         tableobj.rowdata = []
+        if (Number(tableobj.tablename)) {
+            numtablename = true
+        }
         for (let i = 0; i < $('.editcol').children('th').length; i++) {
+            //字段为空
+            if (!$($('.editcol').find('input')[i]).val()) {
+                field = false
+                break
+            }
+            //字段是纯数字
+            if (Number($($('.editcol').find('input')[i]).val())) {
+                numfield = true
+                break
+            }
             tableobj.field.push($($('.editcol').find('input')[i]).val())
         }
         for (let i = 0; i < $('#edittable').children('tbody').find('.editrow').length; i++) {
@@ -433,8 +545,33 @@ $(function () {
             tableobj.rowdata.push(obj)
         }
         let obj = JSON.stringify(tableobj)
-        if (tableobj.tablename) {
-            if(!editflag){
+        if (!tableobj.tablename) {
+            //表名不能为空
+            $('.warning').css('display', 'block')
+            $('.warning').text('表名不能为空')
+            setTimeout(function () {
+                $('.warning').css('display', 'none')
+            }, 1500)
+        } else if (!field) {
+            $('.warning').css('display', 'block')
+            $('.warning').text('字段不能为空')
+            setTimeout(function () {
+                $('.warning').css('display', 'none')
+            }, 1500)
+        } else if (numtablename) {
+            $('.warning').css('display', 'block')
+            $('.warning').text('表名不能为纯数字或以数字开头')
+            setTimeout(function () {
+                $('.warning').css('display', 'none')
+            }, 1500)
+        } else if (numfield) {
+            $('.warning').css('display', 'block')
+            $('.warning').text('字段不能为纯数字或以数字开头')
+            setTimeout(function () {
+                $('.warning').css('display', 'none')
+            }, 1500)
+        } else {
+            if (!editflag) {
                 $.ajax({
                     url: '/addtable',
                     data: obj,
@@ -449,38 +586,28 @@ $(function () {
                     },
                     success: function (data) {
                         //添加表格成功，显示当前表
-                        if(data.success){
+                        if (data.success) {
                             $('.form').css('display', 'block')
                             $('.file').css('display', 'none')
                             $('.addtable').css('display', 'none')
                             gettable()
-                        }else{
+                        } else {
                             $('.warning').css('display', 'block')
                             $('.warning').text('此表已存在')
                             setTimeout(function () {
                                 $('.warning').css('display', 'none')
-                            }, 1000)
+                            }, 1500)
                         }
-                        
+
                     }
-    
-                }) 
-            }else{
+
+                })
+            } else {
                 //编辑表保存
                 console.log('编辑')
                 editflag = true
             }
-            
-        } else {
-            //表名不能为空
-            $('.warning').css('display', 'block')
-            $('.warning').text('表名不能为空')
-            setTimeout(function () {
-                $('.warning').css('display', 'none')
-            }, 1000)
         }
-
-
     })
 
     //左侧下拉选择表格
@@ -494,7 +621,7 @@ $(function () {
             $('.warning').text('操作频繁')
             setTimeout(function () {
                 $('.warning').css('display', 'none')
-            }, 1000)
+            }, 1500)
         } else {
             $.ajax({
                 url: '/nowtabledata',
@@ -513,6 +640,11 @@ $(function () {
                     }
                     var tablehtml = template('nowtable', table)
                     document.getElementById('tablebox').innerHTML = tablehtml
+
+                    //
+                    $('.form').css('display', 'block')
+                    $('.file').css('display', 'none')
+                    $('.addtable').css('display', 'none')
                 }
 
             })
@@ -544,5 +676,23 @@ $(function () {
                 }
             })
         }
+    })
+
+    $('#deletetable').click(function () {
+        let tablename = $('caption').text()
+        $.ajax({
+            url: '/deletetable',
+            data: {tablename},
+            type: 'post',
+            beforeSend: function (request) {
+                //将cookie中的token信息放于请求头中
+                request.setRequestHeader("token", cookieobj.user)
+                request.setRequestHeader('userid', cookieobj.login)
+            },
+            success: function (data) {
+                //刷新页面
+                gettable()
+            }
+        })
     })
 })

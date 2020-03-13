@@ -87,6 +87,15 @@ app.get('/user/alter', function (req,res) {
     })
 })
 
+app.get('/user/playvideo', function (req,res) {
+    fs.readFile('../client/playvideo/video.html', 'utf8', function (err, data) {
+        if (err) {
+            console.log(err);
+        }
+        res.send(data);
+    })
+})
+
 //挂载路由
 app.use(user)
 app.use(svg)

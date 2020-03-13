@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="icon" href="/public/img/favicon.ico">
+    <title>视频播放</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #ccc;
+        }
+
+        .icon {
+            width: 1.2em;
+            height: 1.2em;
+            vertical-align: -0.15em;
+            fill: currentColor;
+            overflow: hidden;
+        }
+
+        .video {
+            margin: auto;
+            padding-bottom: 10px;
+            position: relative;
+            top: 100px;
+            width: 600px;
+            height: 400px;
+            background-color: black;
+        }
+
+        video {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        video::-webkit-media-controls-enclosure {
+            display: none !important;
+        }
+
+        .inlineblock {
+            display: inline-block;
+        }
+
+        .controls {
+            position: absolute;
+            width: 100%;
+            bottom: 0px;
+            height: 50px;
+            z-index: 2147483650;
+        }
+
+        .progressbar {
+            position: absolute;
+            left: 1%;
+            width: 97%;
+            border: 2px solid white;
+        }
+
+        .line {
+            position: absolute;
+            width: 100%;
+            border: 2px solid red;
+            opacity: 0.5;
+        }
+
+        .linebar {
+            position: absolute;
+            width: 0%;
+            border: 2px solid blue;
+        }
+
+        .play {
+            cursor: pointer;
+            position: absolute;
+            left: 10px;
+            bottom: 13px;
+        }
+
+        .time {
+            position: absolute;
+            right: 40px;
+            bottom: 13px;
+            color: skyblue;
+        }
+
+        .screen {
+            position: absolute;
+            bottom: 13px;
+            right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="video">
+        <video src=""></video>
+        <div class="controls">
+            <div class="progressbar">
+                <div class="line"></div>
+                <div class="line linebar" width=""></div>
+            </div>
+            <svg class="icon play" aria-hidden="true">
+                <use xlink:href="#icon-bofang"></use>
+            </svg>
+            <div class="time">
+                <span class="current">00:00:00</span>/<span class="total">00:00:00</span>
+            </div>
+            <svg class="icon screen" aria-hidden="true">
+                <use xlink:href="#icon-shisequanping"></use>
+            </svg>
+        </div>
+    </div>
+
+    <script src="/public/iconfont/iconfont.js"></script>
+    <script src="/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="/public/js/video.js"></script>
+</body>
+
+</html>

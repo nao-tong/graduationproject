@@ -6,6 +6,34 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "3535586",
+      "name": "暂停",
+      "font_class": "zanting",
+      "unicode": "e602",
+      "unicode_decimal": 58882
+    },
+    {
+      "icon_id": "9154245",
+      "name": "实色全屏",
+      "font_class": "shisequanping",
+      "unicode": "e61d",
+      "unicode_decimal": 58909
+    },
+    {
+      "icon_id": "9154275",
+      "name": "实色退出全屏",
+      "font_class": "shisetuichuquanping",
+      "unicode": "e622",
+      "unicode_decimal": 58914
+    },
+    {
+      "icon_id": "12668340",
+      "name": "播放",
+      "font_class": "bofang",
+      "unicode": "e62c",
+      "unicode_decimal": 58924
+    },
+    {
       "icon_id": "10292039",
       "name": "删 除",
       "font_class": "shanchu",

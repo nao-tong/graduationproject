@@ -548,7 +548,7 @@ user.post('/deletefile', function (req, res) {
         })
             .then(function () {
                 return new Promise(function (resolve) {
-                    filelink.findOne('0', function (data) {
+                    filelink.findOne(userid, function (data) {
                         let fileobj = {}
                         fileobj.userid = userid
                         fileobj.fileid = ''
@@ -557,14 +557,26 @@ user.post('/deletefile', function (req, res) {
                                 fileobj.field = item
                             }
                         }
-                        filelink.upDate(fileobj, function (dt) {
-                            if (dt) {
-                                resolve()
-                            }
-                        })
+                        if(fileobj.field){
+                            resolve(fileobj)
+                        }
+                        // filelink.upDate(fileobj, function (dt) {
+                        //     if (dt) {
+                        //         resolve()
+                        //     }
+                        // })
                     })
                 })
 
+            })
+            .then(function(data){
+                return new Promise(function(resolve,reject){
+                    filelink.upDate(data, function (dt) {
+                        if (dt) {
+                            resolve()
+                        }
+                    })
+                })
             })
             .then(function () {
                 fs.unlink('./' + filepath, function (err) {
@@ -809,6 +821,7 @@ user.post('/queryfile', function (req, res) {
 user.post('/alltable', function (req, res) {
     //用户id
     let result = {}
+    result.message = true
     result.tablefield = []
     result.tablename = []
     let userid = aes.Decrypt(req.body.userid)
@@ -820,13 +833,17 @@ user.post('/alltable', function (req, res) {
                 if (item == 'userid') {
                     continue
                 } else {
-                    if (!data[item]) {
-                        result.tablename.push(data[item])
-                    } else {
+                    if (data[item]) {
                         result.tablename.push(data[item].split('_')[0])
                     }
                     if (num == Object.keys(data).length) {
-                        resolve(result.tablename[0] + '_' + userid)
+                        if(!result.tablename.length){
+                            result.message = false
+                            res.send(result)
+                        }else{
+                            resolve(result.tablename[0] + '_' + userid)
+                        }
+                        
                     }
                 }
             }
@@ -940,7 +957,7 @@ user.post('/addtable', function (req, res) {
         //查询空字段
         new Promise(function (resolve, reject) {
             createtable.findAllTable(userid, function (data) {
-                if (data) {
+                if (data.length) {
                     for (let i = 0; i < data.length; i++) {
                         if (data[i].table_name == tablename) {
                             result.success = false
@@ -952,6 +969,8 @@ user.post('/addtable', function (req, res) {
                             }
                         }
                     }
+                }else{
+                    resolve()
                 }
             })
         })
@@ -966,7 +985,6 @@ user.post('/addtable', function (req, res) {
                             arr.push(data[i].Field)
                         }
                     }
-                    console.log(arr)
                     //arr
                     if (arr.length) {
                         new Promise(function (resolve, reject) {
@@ -1154,7 +1172,43 @@ user.post('/edittable', function (req, res) {
 
 //删除表
 user.post('/deletetable', function (req, res) {
-
+    let result = {}
+    result.delete = false
+    let userid = aes.Decrypt(req.headers.userid)
+    let tableobj = {}
+    tableobj.tablename = ''
+    tableobj.userid = userid
+    let tablename = req.body.tablename + '_' + userid
+    new Promise(function(resolve){
+        tablelink.findOne(userid,function(data){
+            for(let item in data){
+                if(data[item] != tablename){
+                    continue
+                }else{
+                    tableobj.field = item
+                    resolve(tableobj)
+                }
+            }
+        })
+    })
+    .then(function(data){
+        let tableobj = data
+        return new Promise(function(resolve){
+            createtable.deleteTable(tablename,function(data){
+                if(!data){
+                    resolve(tableobj)
+                }
+            })
+        })
+    })
+    .then(function(data){
+        tablelink.upDate(data,function(data){
+            if(!data){
+                result.delete = true
+                res.send(result)
+            }
+        })
+    })
 })
 
 //暴露user
