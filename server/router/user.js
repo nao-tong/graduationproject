@@ -164,6 +164,7 @@ user.get('/user/register/createId', function (req, res) {
 
 //头像上传(并发事件会导致污染变量，用数组、自加变量解决)
 user.post('/user/upload', upload.single('avatar'), function (req, res) {
+    console.log(req.file)
     let result = {};
     imgindex++;
     headimg = (req.file.destination + '/' + req.file.filename).replace('.', '');
@@ -542,7 +543,8 @@ user.post('/deletefile', function (req, res) {
         new Promise(function (resolve) {
             filemsg.deleteData(fileid, function (data) {
                 if (data) {
-                    resolve()
+                  console.log(data)
+                  resolve()
                 }
             })
         })
@@ -557,20 +559,15 @@ user.post('/deletefile', function (req, res) {
                                 fileobj.field = item
                             }
                         }
-                        if(fileobj.field){
+                        if (fileobj.field) {
                             resolve(fileobj)
                         }
-                        // filelink.upDate(fileobj, function (dt) {
-                        //     if (dt) {
-                        //         resolve()
-                        //     }
-                        // })
                     })
                 })
 
             })
-            .then(function(data){
-                return new Promise(function(resolve,reject){
+            .then(function (data) {
+                return new Promise(function (resolve, reject) {
                     filelink.upDate(data, function (dt) {
                         if (dt) {
                             resolve()
@@ -589,6 +586,7 @@ user.post('/deletefile', function (req, res) {
                 });
             })
     } catch (error) {
+      console.log(error)
         fs.writeFile('../log.txt', '"' + error + '"', function (err) {
             if (err) {
                 console.log('写入失败')
@@ -837,13 +835,13 @@ user.post('/alltable', function (req, res) {
                         result.tablename.push(data[item].split('_')[0])
                     }
                     if (num == Object.keys(data).length) {
-                        if(!result.tablename.length){
+                        if (!result.tablename.length) {
                             result.message = false
                             res.send(result)
-                        }else{
+                        } else {
                             resolve(result.tablename[0] + '_' + userid)
                         }
-                        
+
                     }
                 }
             }
@@ -969,7 +967,7 @@ user.post('/addtable', function (req, res) {
                             }
                         }
                     }
-                }else{
+                } else {
                     resolve()
                 }
             })
@@ -1015,7 +1013,7 @@ user.post('/addtable', function (req, res) {
                             .then(function (data) {
                                 if (data.empty) {
                                     //有空字段
-                                    tablelink.upDate(tableobj, function (data) {
+                                    tablelink.upData(tableobj, function (data) {
                                         //字段添加成功后添加表格信息????
                                         addTable(tablename, field, rowdata)
                                     })
@@ -1044,7 +1042,7 @@ user.post('/addtable', function (req, res) {
                                         })
                                     })
                                         .then(function (data) {
-                                            tablelink.upDate(data, function () {
+                                            tablelink.upData(data, function () {
                                                 //字段添加成功后添加表格信息???
                                                 addTable(tablename, field, rowdata)
                                             })
@@ -1081,7 +1079,7 @@ user.post('/addtable', function (req, res) {
                             })
                         })
                             .then(function (data) {
-                                tablelink.upDate(data, function () {
+                                tablelink.upData(data, function () {
                                     //字段添加成功后添加表格信息？？？
                                     addTable(tablename, field, rowdata)
                                 })
@@ -1167,7 +1165,161 @@ user.post('/addtable', function (req, res) {
 
 //编辑表?
 user.post('/edittable', function (req, res) {
-
+    let result = {}
+    let userid = aes.Decrypt(req.headers.userid)
+    let tablename = req.body.oldtablename + '_' + userid
+    let newtablename = req.body.tablename + '_' + userid
+    let addfield = req.body.addfield
+    let deletefield = req.body.deletefield
+    let editfield = req.body.editfield
+    let addrowdata = req.body.addrowdata
+    let delrowdata = req.body.delrowdata
+    let editrowdata = req.body.editrowdata
+    let rowdata = req.body.rowdata
+    for (let i = 0; i < editfield.length; i++) {
+        editfield[i].tablename = tablename
+    }
+    new Promise(function (resolve, reject) {
+        //删除字段
+        if (deletefield.length) {
+            let j = 0
+            for (let i = 0; i < deletefield.length; i++) {
+                createtable.deleteField(tablename, deletefield[i], function (data) {
+                    j++
+                    if (j == deletefield.length) {
+                        resolve()
+                    }
+                })
+            }
+        } else {
+            resolve()
+        }
+    })
+        .then(function () {
+            return new Promise(function (resolve, reject) {
+                //添加字段
+                if (addfield.length) {
+                    let j = 0
+                    for (let i = 0; i < addfield.length; i++) {
+                        createtable.addField(tablename, addfield[i], function (data) {
+                            j++
+                            if (j == addfield.length) {
+                                resolve()
+                            }
+                        })
+                    }
+                } else {
+                    resolve()
+                }
+            })
+        })
+        .then(function () {
+            return new Promise(function (resolve, reject) {
+                //编辑字段
+                if (editfield.length) {
+                    let j = 0
+                    for (let i = 0; i < editfield.length; i++) {
+                        createtable.upField(editfield[i], function (data) {
+                            j++
+                            if (j == editfield.length) {
+                                resolve()
+                            }
+                        })
+                    }
+                } else {
+                    resolve()
+                }
+            })
+        })
+        .then(function () {
+            return new Promise(function (resolve, reject) {
+                //删除一行数据
+                if (delrowdata.length) {
+                    let j = 0
+                    for (let i = 0; i < delrowdata.length; i++) {
+                        createtable.delData(tablename, delrowdata[i], function (data) {
+                            j++
+                            if (j == delrowdata.length) {
+                                resolve()
+                            }
+                        })
+                    }
+                } else {
+                    resolve()
+                }
+            })
+        })
+        .then(function () {
+            return new Promise(function (resolve, reject) {
+                //编辑数据
+                if (editrowdata.length) {
+                    let j = 0
+                    for (let i = 0; i < editrowdata.length; i++){
+                        createtable.upData(tablename,editrowdata[i],function(){
+                            j++
+                            if(j == editrowdata.length){
+                                resolve()
+                            }
+                        })
+                    }
+                }else{
+                    resolve()
+                }
+            })
+        })
+        .then(function(){
+            return new Promise(function (resolve, reject) {
+                //添加数据
+                if (addrowdata.length) {
+                    let j = 0
+                    for (let i = 0; i < addrowdata.length; i++){
+                        createtable.addData(tablename,addrowdata[i],function(){
+                            j++
+                            if(j == addrowdata.length){
+                                resolve()
+                            }
+                        })
+                    }
+                }else{
+                    resolve()
+                }
+            })
+        })
+        .then(function(){
+            return new Promise(function(resolve,reject){
+                //修改表名
+                createtable.renameTable(tablename,newtablename,function(data){
+                    resolve()
+                })
+            })
+        })
+        .then(function(){
+            if(tablename == newtablename){
+                result.success = true
+                res.send(result)
+            }else{
+                let obj = {}
+                obj.userid = userid
+                obj.tablename = newtablename
+                new Promise(function(resolve,reject){
+                    tablelink.findOne(userid,function(data){
+                        for(let item in data){
+                            if(data[item] == tablename){
+                                obj.field = item
+                                resolve(obj)
+                                break
+                            }
+                        }
+                    })
+                })
+                .then(function(tableobj){
+                    tablelink.upData(tableobj,function(){
+                        result.success = true
+                        res.send(result)
+                    })
+                })
+            }
+        })
 })
 
 //删除表
@@ -1179,35 +1331,65 @@ user.post('/deletetable', function (req, res) {
     tableobj.tablename = ''
     tableobj.userid = userid
     let tablename = req.body.tablename + '_' + userid
-    new Promise(function(resolve){
-        tablelink.findOne(userid,function(data){
-            for(let item in data){
-                if(data[item] != tablename){
+    new Promise(function (resolve) {
+        tablelink.findOne(userid, function (data) {
+            for (let item in data) {
+                if (data[item] != tablename) {
                     continue
-                }else{
+                } else {
                     tableobj.field = item
                     resolve(tableobj)
                 }
             }
         })
     })
-    .then(function(data){
-        let tableobj = data
-        return new Promise(function(resolve){
-            createtable.deleteTable(tablename,function(data){
-                if(!data){
-                    resolve(tableobj)
+        .then(function (data) {
+            let tableobj = data
+            return new Promise(function (resolve) {
+                createtable.deleteTable(tablename, function (data) {
+                    if (!data) {
+                        resolve(tableobj)
+                    }
+                })
+            })
+        })
+        .then(function (data) {
+            tablelink.upData(data, function (data) {
+                if (!data) {
+                    result.delete = true
+                    res.send(result)
                 }
             })
         })
-    })
-    .then(function(data){
-        tablelink.upDate(data,function(data){
-            if(!data){
-                result.delete = true
-                res.send(result)
+})
+
+//表名搜索
+user.post('/querytable',function(req,res){
+    let result = {}
+    result.success = false
+    result.table = []
+    let message = req.body.message
+    let userid = aes.Decrypt(req.headers.userid)
+    tablelink.findOne(userid,function(data){
+        let j = 0
+        for(let item in data){
+            j++
+            if(item == 'userid'){
+                continue
+            }else{
+                if(String(data[item]).indexOf(message) !== -1){
+                    result.success = true
+                    result.table.push(data[item].split('_')[0])
+                    if(j == Object.keys(data).length){
+                        res.send(result)
+                    }
+                }else{
+                    if(j == Object.keys(data).length){
+                        res.send(result)
+                    }
+                }
             }
-        })
+        }
     })
 })
 

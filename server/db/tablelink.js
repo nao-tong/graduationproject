@@ -101,7 +101,7 @@ function judgeField(userid, callback) {
 }
 
 //更新数据(id必要)
-function upDate(tableobj, callback) {
+function upData(tableobj, callback) {
     connectdb();
     connection.connect();
     connection.query('UPDATE tablelink SET ' + tableobj.field + '= ' + '"' + tableobj.tablename + '"' + ' WHERE userid = ' + '"' + tableobj.userid + '"', function (error, results, fields) {
@@ -118,7 +118,7 @@ exports.descTable = descTable
 exports.findAll = findAll
 exports.findOne = findOne
 exports.judgeField = judgeField
-exports.upDate = upDate
+exports.upData = upData
 
 
 

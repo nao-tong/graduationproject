@@ -9,14 +9,14 @@ const JwtUtil = require('./encapsulation/jwt')
 var app = express();
 
 /* 跨域设置 */
-// app.all('*', function(req, res, next) {
-//     res.header('Access-Control-Allow-Origin', '*'); //访问控制允许来源：所有
-//     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept'); //访问控制允许报头 X-Requested-With: xhr请求
-//     res.header('Access-Control-Allow-Metheds', 'PUT, POST, GET, DELETE, OPTIONS'); //访问控制允许方法
-//     res.header('X-Powered-By', 'nodejs'); //自定义头信息，表示服务端用nodejs
-//     res.header('Content-Type', 'application/json;charset=utf-8');
-//     next();
-// });
+app.all('*', function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*'); //访问控制允许来源：所有
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, token, userid'); //访问控制允许报头 X-Requested-With: xhr请求
+    res.header('Access-Control-Allow-Metheds', 'PUT, POST, GET, DELETE, OPTIONS'); //访问控制允许方法
+    res.header('X-Powered-By', 'nodejs'); //自定义头信息，表示服务端用nodejs
+    res.header('Content-Type', 'application/json;charset=utf-8');
+    next();
+});
 
 //配置静态资源
 app.use('/public/', express.static(path.join(__dirname, './public/')));
@@ -33,7 +33,6 @@ app.use(function (req, res, next) {
         let result = jwt.verifyToken();
         // 如果考验通过就next，否则就返回登陆信息不正确
         if (result == 'err') {
-            console.log('身份验证已过期')
             res.send({status: 403, msg: '身份信息已过期,请重新登录'});
         } else {
             next();

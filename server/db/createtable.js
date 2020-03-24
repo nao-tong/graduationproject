@@ -29,8 +29,20 @@ function createTable(tablename, callback) {
     connection.end();
 }
 
+//修改表名
+function renameTable(oldname, newname, callback) {
+    connectdb();
+    connection.connect();
+    connection.query('ALTER TABLE ' + oldname + ' RENAME TO ' + newname,
+        function (error, results, fields) {
+            if (error) throw error;
+            callback(results.warningCount);
+        });
+    connection.end();
+}
+
 //删除表
-function deleteTable(tablename,callback){
+function deleteTable(tablename, callback) {
     connectdb();
     connection.connect();
     connection.query('DROP TABLE ' + tablename,
@@ -47,6 +59,19 @@ function addField(tablename, field, callback) {
     connection.connect();
     connection.query('ALTER TABLE ' + tablename +
         ' ADD ' + field + ' VARCHAR(255)',
+        function (error, results, fields) {
+            if (error) throw error;
+            callback(results.protocol41);
+        });
+    connection.end();
+}
+
+//删除字段
+function deleteField(tablename, field, callback) {
+    connectdb();
+    connection.connect();
+    connection.query('ALTER TABLE ' + tablename +
+        ' DROP ' + field,
         function (error, results, fields) {
             if (error) throw error;
             callback(results.protocol41);
@@ -93,23 +118,53 @@ function addData(tablename, tableobj, callback) {
 }
 
 //更新数据(id必要)
-function upDate(tabledata, callback) {
-    let objlength = Object.keys(userdata).length
-    connectdb();
-    connection.connect();
+function upData(tablename, tabledata, callback) {
+    let str = 'UPDATE tablename SET field=value WHERE serial=num'
+    let field = ',field=value'
+    let j = 0
+    str = str.replace('tablename', tablename)
     for (let item in tabledata) {
+        j++
         if (item == 'serial') {
             continue
+        }
+        if (j != Object.keys(tabledata).length) {
+            str = str.replace('field=value', item + '=' + '"' + tabledata[item] + '"' + field)
         } else {
-            connection.query('UPDATE user SET ' + item + '= ' + '"' + tabledata[item] + '"' + ' WHERE serial = ' + '"' + tabledata.serial + '"', function (error, results, fields) {
-                objlength--;
-                if (error) throw error;
-                if (objlength == 1) {
-                    callback(results.affectedRows)
-                }
-            });
+            str = str.replace('num', tabledata.serial)
+            str = str.replace('field=value', item + '=' + '"' + tabledata[item] + '"')
         }
     }
+    connectdb();
+    connection.connect();
+    connection.query(str, function (error, results, fields) {
+        if (error) throw error;
+        callback(results.affectedRows);
+    });
+    connection.end();
+}
+
+//删除一条记录(id必要)
+function delData(tablename, serial, callback) {
+    connectdb();
+    connection.connect();
+    connection.query('DELETE FROM ' + tablename + ' WHERE serial = ' + serial,
+        function (error, results, fields) {
+            if (error) throw error;
+            callback(results.warningCount);
+        });
+    connection.end();
+}
+
+//更新字段
+function upField(tableobj, callback) {
+    connectdb();
+    connection.connect();
+    connection.query('ALTER TABLE ' + tableobj.tablename + ' change ' + tableobj.oldfield + ' ' + tableobj.newfield + ' varchar(255)',
+        function (error, results, fields) {
+            if (error) throw error;
+            callback(results.warningCount);
+        });
     connection.end();
 }
 
@@ -125,7 +180,7 @@ function findAll(tablename, callback) {
 }
 
 //查询该用户名下的所有表
-function findAllTable(userid,callback){
+function findAllTable(userid, callback) {
     connectdb();
     connection.connect();
     connection.query('select table_name from information_schema.tables where table_schema="graduationdesign" and table_name like "%_' + userid + '"', function (error, results, fields) {
@@ -137,10 +192,14 @@ function findAllTable(userid,callback){
 
 
 exports.createTable = createTable
-exports.deleteTable = deleteTable 
+exports.renameTable = renameTable
+exports.deleteTable = deleteTable
 exports.addField = addField
+exports.deleteField = deleteField
 exports.addData = addData
-exports.upDate = upDate
+exports.upData = upData
+exports.delData = delData
+exports.upField = upField
 exports.findAll = findAll
 exports.findAllTable = findAllTable
 exports.descTable = descTable

@@ -46,6 +46,10 @@ $(function () {
 
     let olddate = new Date().getTime()
     let editflag = false
+    let oldfield
+    let delrow = []
+    let delfield = []
+
 
     function getfile(dt) {
         if (dt) {
@@ -88,14 +92,15 @@ $(function () {
                 request.setRequestHeader("token", cookieobj.user);
             },
             success: function (res) {
+                oldfield = res.tablefield
                 //表格信息
-                if(!res.message){
+                if (!res.message) {
                     $('.warning').css('display', 'block')
                     $('.warning').text('请添加表格')
                     setTimeout(function () {
                         $('.warning').css('display', 'none')
                     }, 1500)
-                }else{
+                } else {
                     var table = {
                         list: res
                     }
@@ -228,7 +233,7 @@ $(function () {
 
     //文件搜索
     $('.seachfile').click(function () {
-        let message = $('.seachdata').val()
+        let message = $('.seachfdata').val()
         let nowdate = new Date().getTime()
         let datesub = nowdate - olddate
         olddate = nowdate
@@ -421,7 +426,7 @@ $(function () {
 
     //编辑图表
     $('#addcol').click(function () {
-        let textcol = "<th><input type='text'></th>"
+        let textcol = "<th class='addcol'><input type='text'></th>"
         let textrow = "<td><input type='text'></td>"
         $('.editcol').append(textcol)
         $('.editrow').append(textrow)
@@ -435,7 +440,7 @@ $(function () {
         for (let i = 0; i < $('.editcol').children('th').length; i++) {
             $(tr).append($(td).clone())
         }
-        tr.className = 'editrow'
+        tr.className = 'editrow addrow'
         $('#edittable').append(tr)
     })
 
@@ -448,12 +453,16 @@ $(function () {
                 $('.warning').css('display', 'none')
             }, 1500)
         } else {
+            if ($($('.editrow')[rowlength - 1]).attr('id')) {
+                delrow.push($($('.editrow')[rowlength - 1]).attr('id').split('editrow')[1])
+            }
             $('.editrow')[rowlength - 1].remove()
         }
     })
 
     $('#deletecol').click(function () {
         let fieldlength = $('.editcol').children('th').length
+        let rowlength = $('.editrow').length
         if (fieldlength == 1) {
             $('.warning').css('display', 'block')
             $('.warning').text('至少一列')
@@ -461,15 +470,20 @@ $(function () {
                 $('.warning').css('display', 'none')
             }, 1500)
         } else {
+            if ($($('.editcol').children('th')[fieldlength - 1]).children('input').attr('value')) {
+                delfield.push($($('.editcol').children('th')[fieldlength - 1]).children('input').val())
+            }
             $($('.editcol').children('th')[fieldlength - 1]).remove()
-            for (let i = 0; i < fieldlength; i++) {
-                $($('.editrow').children('td')[fieldlength - 1]).remove()
+            for (let i = 0; i < rowlength; i++) {
+                $($($('.editrow')[i]).children('td')[fieldlength - 1]).remove()
             }
         }
     })
 
     $('#editor').click(function () {
         editflag = true
+        delrow = []
+        delfield = []
         let tableobj = {}
         tableobj.tablename = $('caption').text()
         tableobj.field = []
@@ -479,6 +493,7 @@ $(function () {
         }
         for (let i = 0; i < $('#tablebox').find('tbody').find('.row').length; i++) {
             let obj = {}
+            obj.serial = $($('#tablebox').find('tbody').find('.row')[i]).attr('id').split('row')[1]
             for (let j = 0; j < $('.col').children('th').length; j++) {
                 obj[tableobj.field[j]] = $($($('.row')[i]).find('td')[j]).text()
             }
@@ -497,6 +512,7 @@ $(function () {
 
     //不保存
     $('#notsave').click(function () {
+        editflag = false
         $('.form').css('display', 'block')
         $('.file').css('display', 'none')
         $('.addtable').css('display', 'none')
@@ -511,19 +527,29 @@ $(function () {
         $('#edittable').append(base)
     })
 
-    //添加表保存
+    //添加、编辑表保存
     $('#saveeditor').click(function () {
         //获取输入数据
-        let tableobj = {}
+        let dbfield = false
+        let ofield = oldfield
         let field = true
         let numtablename = false
         let numfield = false
+        let tableobj = {}
+        tableobj.oldtablename = $('#edittable').children('caption').find('input').attr('value')
         tableobj.tablename = $('#edittable').children('caption').find('input').val()
         tableobj.field = []
         tableobj.rowdata = []
+        tableobj.addfield = []
+        tableobj.deletefield = delfield
+        tableobj.editfield = []
+        tableobj.addrowdata = []
+        tableobj.delrowdata = delrow
+        tableobj.editrowdata = []
         if (Number(tableobj.tablename)) {
             numtablename = true
         }
+
         for (let i = 0; i < $('.editcol').children('th').length; i++) {
             //字段为空
             if (!$($('.editcol').find('input')[i]).val()) {
@@ -534,6 +560,25 @@ $(function () {
             if (Number($($('.editcol').find('input')[i]).val())) {
                 numfield = true
                 break
+            }
+            //重名字段
+            for (let j = 0; j < $('.editcol').children('th').length; j++) {
+                if (i == j) {
+                    continue
+                } else {
+                    if ($($('.editcol').find('input')[i]).val() == $($('.editcol').find('input')[j]).val()) {
+                        dbfield = true
+                    }
+                }
+            }
+            for (let j = 0; j < ofield.length; j++) {
+                if (i == j) {
+                    continue
+                } else {
+                    if ($($('.editcol').find('input')[i]).val() == ofield[j]) {
+                        dbfield = true
+                    }
+                }
             }
             tableobj.field.push($($('.editcol').find('input')[i]).val())
         }
@@ -570,6 +615,12 @@ $(function () {
             setTimeout(function () {
                 $('.warning').css('display', 'none')
             }, 1500)
+        } else if (dbfield) {
+            $('.warning').css('display', 'block')
+            $('.warning').text('字段不能重名')
+            setTimeout(function () {
+                $('.warning').css('display', 'none')
+            }, 1500)
         } else {
             if (!editflag) {
                 $.ajax({
@@ -603,9 +654,83 @@ $(function () {
 
                 })
             } else {
+                //addfield
+                for (let i = 0; i < $('.addcol').length; i++) {
+                    tableobj.addfield.push($($('.addcol')[i]).children('input').val())
+                }
+                //editfield
+                for (let i = 0; i < $('.editcol').children('th').length; i++) {
+                    let obj = {}
+                    let oldfield = $($('.editcol').find('input')[i]).attr('value')
+                    let newfield = $($('.editcol').find('input')[i]).val()
+                    if (oldfield != newfield) {
+                        if (!$($('.editcol').find('th')[i]).attr('class')) {
+                            obj.oldfield = oldfield
+                            obj.newfield = newfield
+                            obj.tablename = tableobj.tablename
+                            tableobj.editfield.push(obj)
+                        }
+                    }
+                }
+                //addrowdata
+                for (let i = 0; i < $('.addrow').length; i++) {
+                    let obj = {}
+                    for (let j = 0; j < $('.editcol').children('th').length; j++) {
+                        obj[tableobj.field[j]] = $($($('.addrow')[i]).find('input')[j]).val()
+                    }
+                    tableobj.addrowdata.push(obj)
+                }
+                //editrowdata
+                for (let i = 0; i < $('#edittable').children('tbody').find('.editrow').length; i++) {
+                    let obj = {}
+                    if ($($('.editrow')[i]).attr('id')) {
+                        for (let j = 0; j < $('.editcol').children('th').length; j++) {
+                            if ($($($('.editrow')[i]).find('input')[j]).attr('class') == 'changed') {
+                                obj.serial = $($('.editrow')[i]).attr('id').split('editrow')[1]
+                                obj[tableobj.field[j]] = $($($('.editrow')[i]).find('input')[j]).val()
+                                tableobj.editrowdata.push(obj)
+                            }
+                        }
+                    }
+                }
+                console.log(tableobj)
+                let tbobj = JSON.stringify(tableobj)
                 //编辑表保存
-                console.log('编辑')
-                editflag = true
+                $.ajax({
+                    url: '/edittable',
+                    data: tbobj,
+                    dataType: "json",
+                    // traditional: true,
+                    type: 'post',
+                    contentType: 'application/json',
+                    beforeSend: function (request) {
+                        //将cookie中的token信息放于请求头中
+                        request.setRequestHeader("userid", cookieobj.login);
+                        request.setRequestHeader("token", cookieobj.user);
+                    },
+                    success: function (data) {
+                        //添加表格成功，显示当前表
+                        if (data.success) {
+                            $('.form').css('display', 'block')
+                            $('.file').css('display', 'none')
+                            $('.addtable').css('display', 'none')
+                            gettable()
+                            $('.warning').css('display', 'block')
+                            $('.warning').text('保存成功')
+                            setTimeout(function () {
+                                $('.warning').css('display', 'none')
+                            }, 1500)
+                        } else {
+                            $('.warning').css('display', 'block')
+                            $('.warning').text('保存失败')
+                            setTimeout(function () {
+                                $('.warning').css('display', 'none')
+                            }, 1500)
+                        }
+
+                    }
+                })
+                editflag = false
             }
         }
     })
@@ -635,6 +760,7 @@ $(function () {
                 },
                 success: function (data) {
                     //显示当前表格
+                    oldfield = data.tablefield
                     var table = {
                         list: data
                     }
@@ -645,15 +771,21 @@ $(function () {
                     $('.form').css('display', 'block')
                     $('.file').css('display', 'none')
                     $('.addtable').css('display', 'none')
+                    $('.tablebottom').css('display','none')
+                    $('.usertable').css('display','block')
                 }
 
             })
         }
     })
 
+    $('#edittable').on('change', 'input', function (e) {
+        $(e.target).addClass('changed')
+    })
+
     //表格搜索
     $('.seachtable').click(function () {
-        let message = $('.seachdata').val()
+        let message = $('.seachtdata').val()
         if (!message) {
             $('.seachdata').val('请输入关键信息')
         } else {
@@ -667,13 +799,66 @@ $(function () {
                     request.setRequestHeader('userid', cookieobj.login)
                 },
                 success: function (data) {
-                    //刷新页面
-                    if (data) {
-                        getfile(data)
-                    } else {
-                        //服务端错误
+                    if(data.table.length){
+                        var table = {
+                            list: data.table
+                        }
+                        var tablehtml = template('seachtable', table)
+                        document.getElementById('seachtlist').innerHTML = tablehtml
+    
+                        $('.usertable').css('display','none')
+                        $('.tablebottom').css('display','block')
+                    }else{
+                        $('.warning').css('display', 'block')
+                        $('.warning').text('无此表')
+                        setTimeout(function () {
+                            $('.warning').css('display', 'none')
+                        }, 1500)
                     }
                 }
+            })
+        }
+    })
+
+    $('#seachtlist').on('click','li',function(e){
+        let nowdate = new Date().getTime()
+        let datesub = nowdate - olddate
+        olddate = nowdate
+        let tablename = $(e.target).children('span').text()
+        if (datesub < 500) {
+            $('.warning').css('display', 'block')
+            $('.warning').text('操作频繁')
+            setTimeout(function () {
+                $('.warning').css('display', 'none')
+            }, 1500)
+        } else {
+            $.ajax({
+                url: '/nowtabledata',
+                data: { tablename },
+                dataType: "json",
+                type: 'post',
+                beforeSend: function (request) {
+                    //将cookie中的token信息放于请求头中
+                    request.setRequestHeader("userid", cookieobj.login);
+                    request.setRequestHeader("token", cookieobj.user);
+                },
+                success: function (data) {
+                    //显示当前表格
+                    oldfield = data.tablefield
+                    var table = {
+                        list: data
+                    }
+                    var tablehtml = template('nowtable', table)
+                    document.getElementById('tablebox').innerHTML = tablehtml
+
+                    //
+                    $('.form').css('display', 'block')
+                    $('.file').css('display', 'none')
+                    $('.addtable').css('display', 'none')
+                    $('.tablebottom').css('display','none')
+                    $('.usertable').css('display','block')
+                }
+
             })
         }
     })
@@ -682,7 +867,7 @@ $(function () {
         let tablename = $('caption').text()
         $.ajax({
             url: '/deletetable',
-            data: {tablename},
+            data: { tablename },
             type: 'post',
             beforeSend: function (request) {
                 //将cookie中的token信息放于请求头中
@@ -691,7 +876,9 @@ $(function () {
             },
             success: function (data) {
                 //刷新页面
-                gettable()
+                if (data.delete) {
+                    gettable()
+                }
             }
         })
     })
