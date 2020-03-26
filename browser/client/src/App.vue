@@ -46,7 +46,7 @@ html {
   width: 100%;
   height: 100%;
 }
-*{
+body,div,form,table,th,td,tr,ul,li,a,span,img,input,button{
   margin: 0;
   padding: 0;
 }
