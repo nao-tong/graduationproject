@@ -20,7 +20,7 @@
             <div @click="alterData" class="userxiala persondate" id="persondate">
                 <span>个人信息</span>
             </div>
-            <div class="userxiala exit" id="exit">
+            <div @click="exit" class="userxiala exit" id="exit">
                 <span>退出</span>
             </div>
         </div>
@@ -73,7 +73,7 @@
                       <i v-else-if="file.filetype === 'video'" class="iconfont icon-video- fileicon"></i>
                       <i v-else class="iconfont icon-icon fileicon"></i>
                       <!-- 不能在线预览 -->
-                      <a v-if="file.filetype === 'image'" :href="'http://127.0.0.1:3000' + file.filepath"><span class="name">{{ file.filename }}</span></a>
+                      <a v-if="file.filetype === 'image'" :href="'http://127.0.0.1:3000' + file.filepath" target="_blank"><span class="name">{{ file.filename }}</span></a>
                       <span v-else-if="file.filetype === 'video'" class="name playvideo">{{ file.filename }}</span>
                       <span v-else class="name">{{ file.filename }}</span>
                       <a :href="file.filepath" class="download" :download="file.fullname"><i class="iconfont icon-xiazai"></i></a>
@@ -325,7 +325,15 @@ export default {
         time: -1,
         path: '/'
       })
+      let et = new Cookie({
+        name: 'user',
+        value: '',
+        time: -1,
+        path: '/'
+      })
       exit.init()
+      et.init()
+      this.$emit('changepage', 'login')
     },
     alterUserdata: function () {
       // 传递参数（显示哪个form表单）
@@ -880,7 +888,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 #ppp {
   width: 100%;
   height: 100%;
@@ -947,368 +955,368 @@ span.updata {
   border-radius: 4px;
 }
 
-        div.information {
-            position: absolute;
-            width: 150px;
-            top: 50px;
-            right: 10%;
-            background-color: white;
-            border-radius: 5px;
-            z-index: 100;
-        }
+div.information {
+  position: absolute;
+  width: 150px;
+  top: 50px;
+  right: 10%;
+  background-color: white;
+  border-radius: 5px;
+  z-index: 100;
+}
 
-        div.information div.userxiala {
-            cursor: pointer;
-            padding: 5px 0;
-            border-radius: 5px;
-        }
+div.information div.userxiala {
+  cursor: pointer;
+  padding: 5px 0;
+  border-radius: 5px;
+}
 
-        div.information div.userxiala:hover {
-            background-color: #ccc;
-        }
+div.information div.userxiala:hover {
+  background-color: #ccc;
+}
 
-        div.information div.user-username {
-            width: 100%;
-            height: 20px;
-            padding: 5px 0;
-            background-color: #2BC2FE;
-            border-radius: 5px;
-            line-height: 20px;
-        }
+div.information div.user-username {
+  width: 100%;
+  height: 20px;
+  padding: 5px 0;
+  background-color: #2BC2FE;
+  border-radius: 5px;
+  line-height: 20px;
+}
 
-        div.information span {
-            width: 100%;
-            height: 100%;
-            font-size: 13px;
-        }
+div.information span {
+  width: 100%;
+  height: 100%;
+  font-size: 13px;
+}
 
-        div.information div.userxiala {
-            width: 100%;
-            height: 20px;
-            line-height: 20px;
-        }
+div.information div.userxiala {
+  width: 100%;
+  height: 20px;
+  line-height: 20px;
+}
 
-        .content {
-            width: 100%;
-            height: 90%;
-            display: flex;
-            justify-content: space-between;
-        }
+.content {
+  width: 100%;
+  height: 90%;
+  display: flex;
+  justify-content: space-between;
+}
 
-        .content .left {
-            width: 192px;
-            height: 100%;
-            text-align: center;
-            background-color: rgb(240, 245, 252);
-        }
+.content .left {
+  width: 192px;
+  height: 100%;
+  text-align: center;
+  background-color: rgb(240, 245, 252);
+}
 
-        .content .left .leftxiala {
-          display: inline-block;
-          width: 100%;
-        }
+.content .left .leftxiala {
+  display: inline-block;
+  width: 100%;
+}
 
-        .content .left .xiala {
-            cursor: pointer;
-            display: block;
-            width: 100%;
-            height: 42px;
-            color: black;
-            line-height: 42px;
-        }
+.content .left .xiala {
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  height: 42px;
+  color: black;
+  line-height: 42px;
+}
 
-        .content .left .xiala:hover {
-            background-color: #cccccc;
-        }
+.content .left .xiala:hover {
+  background-color: #cccccc;
+}
 
-        .content .left .secondtable {
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-        }
+.content .left .secondtable {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
 
-        .content .left .second {
-            cursor: pointer;
-            display: block;
-            height: 32px;
-            line-height: 32px;
-            font-size: 13px;
-        }
+.content .left .second {
+  cursor: pointer;
+  display: block;
+  height: 32px;
+  line-height: 32px;
+  font-size: 13px;
+}
 
-        .content .left .active {
-            background-color: #cccccc;
-        }
+.content .left .active {
+  background-color: #cccccc;
+}
 
-        .content .right {
-            position: relative;
-            width: 100%;
-        }
+.content .right {
+  position: relative;
+  width: 100%;
+}
 
-        .content .file .bottom ul {
-            width: 100%;
-        }
+.content .file .bottom ul {
+  width: 100%;
+}
 
-        .content .file .bottom div.top {
-            width: 100%;
-            color: #CACED0;
-            font-size: 13px;
-            margin-top: 10px;
-            border: none;
-        }
+.content .file .bottom div.top {
+  width: 100%;
+  color: #CACED0;
+  font-size: 13px;
+  margin-top: 10px;
+  border: none;
+}
 
-        .content .file .bottom div.top:hover {
-            background-color: #F4FBFF;
-            border: none;
-        }
+.content .file .bottom div.top:hover {
+  background-color: #F4FBFF;
+  border: none;
+}
 
-        .content .file .bottom div.top span {
-            display: inline-block;
-            padding-left: 20px;
-        }
+.content .file .bottom div.top span {
+  display: inline-block;
+  padding-left: 20px;
+}
 
-        .content .file .bottom div.top span.s1 {
-            width: 60%;
-        }
+.content .file .bottom div.top span.s1 {
+  width: 60%;
+}
 
-        .content .file .bottom div.top span.s2 {
-            width: 15%;
-        }
+.content .file .bottom div.top span.s2 {
+  width: 15%;
+}
 
-        .content .file .bottom ul li input {
-            position: relative;
-            right: 10px;
-        }
+.content .file .bottom ul li input {
+  position: relative;
+  right: 10px;
+}
 
-        .content .file .bottom ul li span {
-            position: relative;
-            display: inline-block;
-            font-size: 13px;
-            padding-left: 20px;
-        }
+.content .file .bottom ul li span {
+  position: relative;
+  display: inline-block;
+  font-size: 13px;
+  padding-left: 20px;
+}
 
-        .content .file .bottom ul li span.playvideo{
-            cursor: pointer;
-        }
+.content .file .bottom ul li span.playvideo{
+  cursor: pointer;
+}
 
-        .content .file .bottom ul li span.name {
-            right: 20px;
-        }
+.content .file .bottom ul li span.name {
+  right: 20px;
+}
 
-        .content .file .bottom ul li span a.download {
-            position: absolute;
-            right: 3%;
-        }
+.content .file .bottom ul li span a.download {
+  position: absolute;
+  right: 3%;
+}
 
-        .content .file .bottom ul li span a.download i {
-            font-size: 20px;
-            color: black;
-        }
+.content .file .bottom ul li span a.download i {
+  font-size: 20px;
+  color: black;
+}
 
-        .content .file .bottom ul li span i.icon-shanchu {
-            position: absolute;
-            right: 7%;
-            cursor: pointer;
-        }
+.content .file .bottom ul li span i.icon-shanchu {
+  position: absolute;
+  right: 7%;
+  cursor: pointer;
+}
 
-        .content .file .bottom ul li span i.fileid {
-            display: none;
-        }
+.content .file .bottom ul li span i.fileid {
+  display: none;
+}
 
-        .content .file .bottom ul li span .fileicon {
-            margin-right: 10px;
-        }
+.content .file .bottom ul li span .fileicon {
+  margin-right: 10px;
+}
 
-        .content .file .bottom ul li span.s1 {
-            width: 60%;
-        }
+.content .file .bottom ul li span.s1 {
+  width: 60%;
+}
 
-        .content .file .bottom ul li span.s2 {
-            width: 15%;
-        }
+.content .file .bottom ul li span.s2 {
+  width: 15%;
+}
 
-        .content .file .bottom ul li {
-            width: 100%;
-            height: 44px;
-            list-style: none;
-            line-height: 44px;
-            border-bottom: 0.5px solid #F4FBFF;
-            border-top: 0.5px solid #F4FBFF;
-        }
+.content .file .bottom ul li {
+  width: 100%;
+  height: 44px;
+  list-style: none;
+  line-height: 44px;
+  border-bottom: 0.5px solid #F4FBFF;
+  border-top: 0.5px solid #F4FBFF;
+}
 
-        .content .file .bottom ul li:hover {
-            background-color: #F4FBFF;
-            border-bottom: 0.5px solid #DAEBFE;
-            border-top: 0.5px solid #DAEBFE;
-        }
+.content .file .bottom ul li:hover {
+  background-color: #F4FBFF;
+  border-bottom: 0.5px solid #DAEBFE;
+  border-top: 0.5px solid #DAEBFE;
+}
 
-        .content .addtable .usertable table tr th input {
-            width: 90%;
-            height: 90%;
-        }
+.content .addtable .usertable table tr th input {
+  width: 90%;
+  height: 90%;
+}
 
-        .content .addtable .usertable table tr td input {
-            width: 90%;
-            height: 90%;
-        }
+.content .addtable .usertable table tr td input {
+  width: 90%;
+  height: 90%;
+}
 
-        .content .addtable .top #notsave{
-            position: absolute;
-            right: 120px;
-        }
+.content .addtable .top #notsave{
+  position: absolute;
+  right: 120px;
+}
 
-        .content .addtable .top #saveeditor {
-            position: absolute;
-            right: 20px;
-        }
+.content .addtable .top #saveeditor {
+  position: absolute;
+  right: 20px;
+}
 
-        .upl {
-            cursor: pointer;
-            display: inline-block;
-            width: 84px;
-            height: 34px;
-            margin-top: 10px;
-            margin-right: 10px;
-            background-color: royalblue;
-            color: white;
-            text-align: center;
-            line-height: 34px;
-            border-radius: 4px;
-        }
+.upl {
+  cursor: pointer;
+  display: inline-block;
+  width: 84px;
+  height: 34px;
+  margin-top: 10px;
+  margin-right: 10px;
+  background-color: royalblue;
+  color: white;
+  text-align: center;
+  line-height: 34px;
+  border-radius: 4px;
+}
 
-        #avater {
-            opacity: 0;
-            position: absolute;
-            top: 10px;
-            left: 0;
-            width: 84px;
-            height: 34px;
-            overflow: hidden;
-            border-radius: 4px;
-        }
+#avater {
+  opacity: 0;
+  position: absolute;
+  top: 10px;
+  left: 0;
+  width: 84px;
+  height: 34px;
+  overflow: hidden;
+  border-radius: 4px;
+}
 
-        #uploadfile {
-            width: 100%;
-            height: 100%;
-        }
+#uploadfile {
+  width: 100%;
+  height: 100%;
+}
 
-        #allfile {
-            position: absolute;
-            right: 20px;
-        }
+#allfile {
+  position: absolute;
+  right: 20px;
+}
 
-        #deletetable {
-            position: absolute;
-            right: 20px;
-        }
+#deletetable {
+  position: absolute;
+  right: 20px;
+}
 
-        .seach {
-            position: absolute;
-            height: 32px;
-            width: 200px;
-            padding: 0 0 0 20px;
-            border-radius: 32px;
-            background-color: #cccccc;
-            right: 200px;
-            top: 10px;
-        }
+.seach {
+  position: absolute;
+  height: 32px;
+  width: 200px;
+  padding: 0 0 0 20px;
+  border-radius: 32px;
+  background-color: #cccccc;
+  right: 200px;
+  top: 10px;
+}
 
-        .seachdata {
-            width: 80%;
-            height: 100%;
-            border: none;
-            outline: none;
-            background-color: #cccccc;
-        }
+.seachdata {
+  width: 80%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background-color: #cccccc;
+}
 
-        .icon-tubiao- {
-            display: inline-block;
-            position: absolute;
-            top: 3px;
-            width: 20px;
-            height: 20px;
-            font-size: 25px;
-            color: blue;
-        }
+.icon-tubiao- {
+  display: inline-block;
+  position: absolute;
+  top: 3px;
+  width: 20px;
+  height: 20px;
+  font-size: 25px;
+  color: blue;
+}
 
-        .icon-tubiao-:hover {
-            cursor: pointer;
-        }
+.icon-tubiao-:hover {
+  cursor: pointer;
+}
 
-        .chartbox {
-            display: none;
-            position: absolute;
-            width: 84px;
-            left: 197px;
-            top: 42px;
-            color: white;
-            background-color: royalblue;
-            text-align: center;
-        }
+.chartbox {
+  display: none;
+  position: absolute;
+  width: 84px;
+  left: 197px;
+  top: 42px;
+  color: white;
+  background-color: royalblue;
+  text-align: center;
+}
 
-        .chartbox ul li {
-            margin-bottom: 5px;
-        }
+.chartbox ul li {
+  margin-bottom: 5px;
+}
 
-        .chartbox ul li a.chart {
-            color: white;
-        }
+.chartbox ul li a.chart {
+  color: white;
+}
 
-        .bottom .chart {
-            display: none;
-        }
+.bottom .chart {
+  display: none;
+}
 
-        .bottom div.formbox {
-            margin-left: 4%;
-        }
+.bottom div.formbox {
+  margin-left: 4%;
+}
 
-        .content .form .tablebottom div.top {
-            width: 100%;
-            color: #CACED0;
-            font-size: 13px;
-            margin-top: 10px;
-            border: none;
-        }
+.content .form .tablebottom div.top {
+  width: 100%;
+  color: #CACED0;
+  font-size: 13px;
+  margin-top: 10px;
+  border: none;
+}
 
-        .content .form .tablebottom div.top:hover {
-            background-color: #F4FBFF;
-            border: none;
-        }
+.content .form .tablebottom div.top:hover {
+  background-color: #F4FBFF;
+  border: none;
+}
 
-        .content .form .tablebottom div.top span {
-            display: inline-block;
-            padding-left: 20px;
-        }
+.content .form .tablebottom div.top span {
+  display: inline-block;
+  padding-left: 20px;
+}
 
-        .content .form .tablebottom ul li {
-            width: 100%;
-            height: 44px;
-            list-style: none;
-            line-height: 44px;
-            border-bottom: 0.5px solid #F4FBFF;
-            border-top: 0.5px solid #F4FBFF;
-        }
+.content .form .tablebottom ul li {
+  width: 100%;
+  height: 44px;
+  list-style: none;
+  line-height: 44px;
+  border-bottom: 0.5px solid #F4FBFF;
+  border-top: 0.5px solid #F4FBFF;
+}
 
-        .content .form .tablebottom ul li:hover {
-            background-color: #F4FBFF;
-            border-bottom: 0.5px solid #DAEBFE;
-            border-top: 0.5px solid #DAEBFE;
-        }
+.content .form .tablebottom ul li:hover {
+  background-color: #F4FBFF;
+  border-bottom: 0.5px solid #DAEBFE;
+  border-top: 0.5px solid #DAEBFE;
+}
 
-        .content .form .tablebottom ul li span {
-            position: relative;
-            display: inline-block;
-            font-size: 13px;
-            padding-left: 20px;
-        }
+.content .form .tablebottom ul li span {
+  position: relative;
+  display: inline-block;
+  font-size: 13px;
+  padding-left: 20px;
+}
 
-        .warning {
-            position: absolute;
-            left: 43%;
-            bottom: 10%;
-            height: 40px;
-            padding: 0 20px;
-            line-height: 40px;
-            text-align: center;
-            border-radius: 20px;
-            background-color: #ccc;
-        }
+.warning {
+  position: absolute;
+  left: 43%;
+  bottom: 10%;
+  height: 40px;
+  padding: 0 20px;
+  line-height: 40px;
+  text-align: center;
+  border-radius: 20px;
+  background-color: #ccc;
+}
 </style>

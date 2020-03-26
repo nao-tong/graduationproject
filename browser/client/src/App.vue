@@ -21,13 +21,22 @@ export default {
   methods: {
     changePage: function (page, alter) {
       this.page = page
-      this.alter = alter
+      if (alter) {
+        this.alter = alter
+      } else {
+        this.alter = false
+      }
     }
   },
   components: {
     Login,
     Register,
     Personpage
+  },
+  created: function () {
+    if (document.cookie) {
+      this.page = 'personpage'
+    }
   }
 }
 </script>
