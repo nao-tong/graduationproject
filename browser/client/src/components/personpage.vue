@@ -31,9 +31,9 @@
                 <!-- 点击显示二级菜单 -->
                 <span @click="displayFile(false)" ref="displayfile" class="xiala files" id="xialafile">文件</span>
                 <div v-show="flist" ref="secondfile" class="secondbox secondfile">
-                    <span class="second">视频</span>
-                    <span class="second">图片</span>
-                    <span class="second">文本</span>
+                  <span class="second">视频</span>
+                  <span class="second">图片</span>
+                  <span class="second">文本</span>
                 </div>
             </div>
             <div class="leftxiala">
@@ -73,7 +73,7 @@
                       <i v-else-if="file.filetype === 'video'" class="iconfont icon-video- fileicon"></i>
                       <i v-else class="iconfont icon-icon fileicon"></i>
                       <!-- 不能在线预览 -->
-                      <a v-if="file.filetype === 'image'" :href="'http://127.0.0.1:3000' + file.filepath" target="_blank"><span class="name">{{ file.filename }}</span></a>
+                      <a onclick="return false" v-if="file.filetype === 'image'" :href="'http://127.0.0.1:3000' + file.filepath" target="_blank" class="displayimage"><span class="name displayimage">{{ file.filename }}</span></a>
                       <span v-else-if="file.filetype === 'video'" class="name playvideo">{{ file.filename }}</span>
                       <span v-else class="name">{{ file.filename }}</span>
                       <a :href="file.filepath" class="download" :download="file.fullname"><i class="iconfont icon-xiazai"></i></a>
@@ -120,7 +120,7 @@
                 <!-- 表格 -->
                 <div class="formbox" id="tablebox">
                   <table border="1" frame="void" cellspacing="0" rules="groups">
-                    <caption v-if="typeof(nowtable.tablename) === 'object'">{{ nowtable.tablename[0] }}</caption>
+                    <caption v-if="typeof(nowtable.tablename) === 'object'" class="delcaption">{{ nowtable.tablename[0] }}</caption>
                     <caption v-else>{{ nowtable.tablename }}</caption>
                     <tr class="col">
                         <th v-for="(field, key) in nowtable.tablefield" :key="key">{{ field }}</th>
@@ -191,6 +191,10 @@
             </div>
         </div>
     </div>
+    <div v-show="imghref" class="displayimg">
+      <span @click="closeImg" class="iconfont icon-guanbi"></span>
+      <img :src="imghref" alt="">
+    </div>
     <div v-show="waring" ref="error" class="warning"> {{ waringtext }} </div>
   </div>
 </template>
@@ -207,6 +211,7 @@ export default {
       information: false,
       waring: false,
       waringtext: '123',
+      imghref: '',
       seachfile: '',
       oldfield: '',
       delrow: [],
@@ -400,6 +405,10 @@ export default {
       }
     },
     flieClass: function (e) {
+      if (this.editflag) {
+        this.waringBox('请保存或不保存')
+        return false
+      }
       this.file = true
       this.table = false
       this.editor = false
@@ -443,7 +452,7 @@ export default {
       } else {
         let that = this
         let filepath = e.target.previousElementSibling.getAttribute('href')
-        let field = e.target.nextElementSibling.innerText
+        let fileid = e.target.nextElementSibling.innerText
         let baseurl = 'http://127.0.0.1:3000'
         let cookieobj = this.alaysisCookie(document.cookie)
         let Axios = axios.create({
@@ -453,11 +462,10 @@ export default {
         Axios.defaults.headers.common['userid'] = cookieobj.login
         Axios.post('/deletefile', {
           filepath,
-          field
+          fileid
         })
           .then(data => {
             if (data.data) {
-              console.log(data)
               that.getFile()
             } else {
               that.waringBox('服务器开小差了')
@@ -491,7 +499,25 @@ export default {
           that.getFile()
         })
     },
+    displayImg: function (e) {
+      if (e.target.className.indexOf('displayimage') !== -1) {
+        if (e.target.className.indexOf('name') !== -1) {
+          this.imghref = e.target.parentNode.href
+        } else {
+          this.imghref = e.target.href
+        }
+      } else {
+        return false
+      }
+    },
+    closeImg: function () {
+      this.imghref = ''
+    },
     displayFile: function (flag) {
+      if (this.editflag) {
+        this.waringBox('请保存或不保存')
+        return false
+      }
       if (!flag) {
         this.flist = !this.flist
         this.file = true
@@ -504,6 +530,10 @@ export default {
       }
     },
     displayTable: function (flag) {
+      if (this.editflag) {
+        this.waringBox('请保存或不保存')
+        return false
+      }
       this.seachtlist = []
       if (!flag) {
         this.tlist = !this.tlist
@@ -522,6 +552,10 @@ export default {
       this.editor = true
     },
     nowTable: function (e) {
+      if (this.editflag) {
+        this.waringBox('请保存或不保存')
+        return false
+      }
       let that = this
       this.editflag = false
       let flag = this.restrictOperation()
@@ -733,6 +767,7 @@ export default {
               if (data.data.success) {
                 that.getTable()
                 that.displayTable()
+                this.notSave()
               } else {
                 that.waringBox('此表已存在')
               }
@@ -793,6 +828,7 @@ export default {
               if (data.data.success) {
                 that.getTable()
                 that.displayTable()
+                this.notSave()
                 that.waringBox('保存成功')
               } else {
                 that.waringBox('保存失败')
@@ -803,7 +839,12 @@ export default {
     },
     deleteTable: function () {
       let that = this
-      let tablename = document.getElementsByTagName('caption').innerText
+      let tablename
+      if (typeof (this.nowtable.tablename) === 'object') {
+        tablename = this.nowtable.tablename[0]
+      } else {
+        tablename = this.nowtable.tablename
+      }
       let baseurl = 'http://127.0.0.1:3000'
       let cookieobj = this.alaysisCookie(document.cookie)
       let Axios = axios.create({
@@ -882,13 +923,14 @@ export default {
     })
     this.$refs.secondfile.addEventListener('click', this.flieClass)
     this.$refs.filelist.addEventListener('click', this.deleteFile)
+    this.$refs.filelist.addEventListener('click', this.displayImg)
     this.$refs.nowtable.addEventListener('click', this.nowTable)
     this.$refs.seachtlist.addEventListener('click', this.listNowTable)
   }
 }
 </script>
 
-<style scoped>
+<style>
 #ppp {
   width: 100%;
   height: 100%;
@@ -1040,6 +1082,9 @@ div.information div.userxiala {
   height: 32px;
   line-height: 32px;
   font-size: 13px;
+}
+.content .left .second:hover {
+  background-color: #cccccc;
 }
 
 .content .left .active {
@@ -1318,5 +1363,27 @@ div.information div.userxiala {
   text-align: center;
   border-radius: 20px;
   background-color: #ccc;
+}
+
+.displayimg {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 400px;
+  height: 300px;
+  transform: translateX(-50%) translateY(-50%);
+}
+
+.displayimg .iconfont {
+  cursor: pointer;
+  position: absolute;
+  right: 0;
+  font-size: 20px;
+}
+
+.displayimg img {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 </style>

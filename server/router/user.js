@@ -543,7 +543,6 @@ user.post('/deletefile', function (req, res) {
         new Promise(function (resolve) {
             filemsg.deleteData(fileid, function (data) {
                 if (data) {
-                  console.log(data)
                   resolve()
                 }
             })
@@ -1355,7 +1354,7 @@ user.post('/deletetable', function (req, res) {
         })
         .then(function (data) {
             tablelink.upData(data, function (data) {
-                if (!data) {
+                if (data) {
                     result.delete = true
                     res.send(result)
                 }
