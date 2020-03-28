@@ -50,7 +50,7 @@
                 <form ref="avater" id="avater" action="/upload" method="post" enctype="multipart/form-data">
                     <input @change="uploadFile" type="file" name="avatar" id="uploadfile" />
                 </form>
-                <span class="upl allfile" id="allfile">全部文件</span>
+                <span @click="allFile" class="upl allfile" id="allfile">全部文件</span>
                 <div class="seach">
                     <input v-model="seachfile" type="text" class="seachdata seachfdata">
                     <span @click="seachFile" class="iconfont icon-tubiao- seachfile"></span>
@@ -72,9 +72,8 @@
                       <i v-if="file.filetype === 'image'" class="iconfont icon-tupian fileicon"></i>
                       <i v-else-if="file.filetype === 'video'" class="iconfont icon-video- fileicon"></i>
                       <i v-else class="iconfont icon-icon fileicon"></i>
-                      <!-- 不能在线预览 -->
                       <a onclick="return false" v-if="file.filetype === 'image'" :href="'http://127.0.0.1:3000' + file.filepath" target="_blank" class="displayimage"><span class="name displayimage">{{ file.filename }}</span></a>
-                      <span v-else-if="file.filetype === 'video'" class="name playvideo">{{ file.filename }}</span>
+                      <span @click="displayVideo" v-else-if="file.filetype === 'video'" class="name playvideo" :playpath="'http://127.0.0.1:3000' + file.filepath">{{ file.filename }}</span>
                       <span v-else class="name">{{ file.filename }}</span>
                       <a :href="file.filepath" class="download" :download="file.fullname"><i class="iconfont icon-xiazai"></i></a>
                       <i class="iconfont icon-shanchu"></i>
@@ -123,7 +122,10 @@
                     <caption v-if="typeof(nowtable.tablename) === 'object'" class="delcaption">{{ nowtable.tablename[0] }}</caption>
                     <caption v-else>{{ nowtable.tablename }}</caption>
                     <tr class="col">
-                        <th v-for="(field, key) in nowtable.tablefield" :key="key">{{ field }}</th>
+                        <th v-for="(field, key) in nowtable.tablefield" :key="key">
+                          <input type="checkbox">
+                          {{ field }}
+                        </th>
                     </tr>
                     <tr v-for="(item, key) in nowtable.table" :key="key" class="row" :id="'row' + nowtable.table[key].serial">
                         <td v-for="(it, index) in nowtable.tablefield" :key="index" >{{ item[it] }}</td>
@@ -195,6 +197,12 @@
       <span @click="closeImg" class="iconfont icon-guanbi"></span>
       <img :src="imghref" alt="">
     </div>
+    <div v-show="videosrc" class="displayvideo">
+      <span @click="closeVideo" class="iconfont icon-guanbi"></span>
+      <div class="video">
+        <video ref="myvideo" :src="videosrc"></video>
+      </div>
+    </div>
     <div v-show="waring" ref="error" class="warning"> {{ waringtext }} </div>
   </div>
 </template>
@@ -212,6 +220,9 @@ export default {
       waring: false,
       waringtext: '123',
       imghref: '',
+      videosrc: '',
+      playvideo: false,
+      fullscreen: false,
       seachfile: '',
       oldfield: '',
       delrow: [],
@@ -288,6 +299,22 @@ export default {
       if (data) {
         this.filelist = data
       } else {
+        let that = this
+        let baseurl = 'http://127.0.0.1:3000'
+        let cookieobj = this.alaysisCookie(document.cookie)
+        let Axios = axios.create({
+          baseURL: baseurl
+        })
+        Axios.defaults.headers.common['token'] = cookieobj.user
+        Axios.post('/findfile', {userid: cookieobj.login})
+          .then(data => {
+            that.filelist = data.data
+          })
+      }
+    },
+    allFile: function () {
+      let flag = this.restrictOperation()
+      if (!flag) {
         let that = this
         let baseurl = 'http://127.0.0.1:3000'
         let cookieobj = this.alaysisCookie(document.cookie)
@@ -406,7 +433,7 @@ export default {
     },
     flieClass: function (e) {
       if (this.editflag) {
-        this.waringBox('请保存或不保存')
+        this.waringBox('请先保存或不保存')
         return false
       }
       this.file = true
@@ -513,9 +540,15 @@ export default {
     closeImg: function () {
       this.imghref = ''
     },
+    displayVideo: function (e) {
+      this.videosrc = e.target.getAttribute('playpath')
+    },
+    closeVideo: function () {
+      this.videosrc = ''
+    },
     displayFile: function (flag) {
       if (this.editflag) {
-        this.waringBox('请保存或不保存')
+        this.waringBox('请先保存或不保存')
         return false
       }
       if (!flag) {
@@ -531,7 +564,7 @@ export default {
     },
     displayTable: function (flag) {
       if (this.editflag) {
-        this.waringBox('请保存或不保存')
+        this.waringBox('请先保存或不保存')
         return false
       }
       this.seachtlist = []
@@ -553,7 +586,7 @@ export default {
     },
     nowTable: function (e) {
       if (this.editflag) {
-        this.waringBox('请保存或不保存')
+        this.waringBox('请先保存或不保存')
         return false
       }
       let that = this
@@ -826,6 +859,7 @@ export default {
           Axios.post('/edittable', tableobj)
             .then(data => {
               if (data.data.success) {
+                this.editflag = false
                 that.getTable()
                 that.displayTable()
                 this.notSave()
@@ -926,6 +960,7 @@ export default {
     this.$refs.filelist.addEventListener('click', this.displayImg)
     this.$refs.nowtable.addEventListener('click', this.nowTable)
     this.$refs.seachtlist.addEventListener('click', this.listNowTable)
+    this.$refs.myvideo.controls = true
   }
 }
 </script>
@@ -1369,8 +1404,8 @@ div.information div.userxiala {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 400px;
-  height: 300px;
+  width: 600px;
+  height: 400px;
   transform: translateX(-50%) translateY(-50%);
 }
 
@@ -1383,6 +1418,33 @@ div.information div.userxiala {
 
 .displayimg img {
   display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.displayvideo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 600px;
+  height: 400px;
+  transform: translateX(-50%) translateY(-50%);
+}
+
+.displayvideo .icon-guanbi {
+  cursor: pointer;
+  position: absolute;
+  right: 0;
+  font-size: 20px;
+  z-index: 1;
+}
+
+.displayvideo .video {
+  width: 100%;
+  height: 100%;
+}
+
+.displayvideo .video video {
   width: 100%;
   height: 100%;
 }
