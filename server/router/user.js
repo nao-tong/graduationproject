@@ -241,9 +241,6 @@ user.post('/user/register', function (req, res) {
  * 个人页面
  */
 //personpage
-user.post('/user/personpage', function (req, res) {
-
-})
 
 //修改个人信息
 user.post('/alteruser', function (req, res) {
@@ -318,6 +315,48 @@ user.post('/alteruser', function (req, res) {
             }
         })
     }
+})
+
+//所有用户信息
+user.post('/alluser', function (req, res) {
+  let result
+  //获取所有用户信息（密码等信息除外）
+  new Promise(function (resolve, reject) {
+    usertable.findAll(function (data) {
+      if (data) {
+        resolve(data)
+      }
+    })
+  })
+    .then(function (alluser) {
+      result = alluser.filter(function (val) {
+        return (val.userid != '999999999')
+      })
+      for (let i = 0; i < result.length; i++) {
+        result[i].password = ''
+        result[i].headimg = ''
+      }
+      res.send(result)
+    })
+})
+
+//重置密码
+user.post('/resetPassword', function (req, res) {
+  let result = false
+  let userobj = {}
+  userobj.userid = req.body.userid
+  userobj.password = aes.Encrypt('123456')
+  new Promise(function (resolve, reject) {
+    usertable.upDate(userobj, function (data) {
+      if (data) {
+        resolve()
+      }
+    })
+  })
+    .then(() => {
+      result = true
+      res.send(result)
+    })
 })
 
 //文件上传

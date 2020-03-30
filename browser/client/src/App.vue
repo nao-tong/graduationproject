@@ -18,6 +18,11 @@ export default {
       alter: false
     }
   },
+  watch: {
+    page: (newvalue, oldvalue) => {
+      window.location.href = '#/' + newvalue
+    }
+  },
   methods: {
     changePage: function (page, alter) {
       this.page = page
@@ -25,6 +30,15 @@ export default {
         this.alter = alter
       } else {
         this.alter = false
+      }
+    },
+    urlWatch: function (url) {
+      if (url.indexOf('/login') !== -1) {
+        this.page = 'login'
+      } else if (url.indexOf('/register') !== -1) {
+        this.page = 'register'
+      } else {
+        this.page = 'psesonpage'
       }
     }
   },
@@ -37,6 +51,12 @@ export default {
     if (document.cookie) {
       this.page = 'personpage'
     }
+  },
+  mounted: function () {
+    let that = this
+    window.addEventListener('hashchange', () => {
+      that.urlWatch(window.location.href)
+    })
   }
 }
 </script>

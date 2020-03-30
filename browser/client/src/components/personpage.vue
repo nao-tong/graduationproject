@@ -11,7 +11,7 @@
             6、离开前必须关闭门窗
         </marquee>
         <img @mouseover="information = true" @mouseout="information = false" ref="headimg" src="" alt="headimg" id="headimg">
-        <span v-show="admin" class="updata">用户管理</span>
+        <span v-show="admin" @click="allUser" class="updata">用户管理</span>
         <div v-show="information" @mouseover="information = true" @mouseout="information = false" class="information" id="information">
             <div class="user-username">
                 <span>昵称：</span>
@@ -192,29 +192,43 @@
                 </div>
             </div>
         </div>
+
+        <div v-if="admin" v-show="adminflag" class="alluser">
+          <div class="top">
+            <span class="s s1">账号</span>
+            <span class="s s2">用户名</span>
+            <span class="s s3">用户类型</span>
+            <span>重置密码</span>
+          </div>
+          <ul>
+            <li v-for="(user,key) in alluser" :key="key">
+              <span class="s s1">{{ user.userid }}</span>
+              <span class="s s2">{{ user.username }}</span>
+              <span v-if="user.admin === 0" class="s s3">管理员</span>
+              <span v-else class="s s3">普通用户</span>
+              <span @click="resetPassword" class="reset" :userid="user.userid">重置</span>
+            </li>
+          </ul>
+        </div>
     </div>
-    <div v-show="imghref" class="displayimg">
-      <span @click="closeImg" class="iconfont icon-guanbi"></span>
-      <img :src="imghref" alt="">
-    </div>
-    <div v-show="videosrc" class="displayvideo">
-      <span @click="closeVideo" class="iconfont icon-guanbi"></span>
-      <div class="video">
-        <video ref="myvideo" :src="videosrc"></video>
-      </div>
-    </div>
+    <Img v-show="imghref" @closeImg="closeImg" :imghref="imghref" />
+    <Video v-show="videosrc" @closeVideo="closeVideo" :videosrc="videosrc" />
     <div v-show="waring" ref="error" class="warning"> {{ waringtext }} </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios'
+import Video from './video'
+import Img from './image'
 export default {
   name: 'Personpage',
   data () {
     return {
       olddate: '',
       admin: false,
+      adminflag: false,
+      alluser: [],
       username: '',
       information: false,
       waring: false,
@@ -270,6 +284,36 @@ export default {
           }
           that.username = data.data.username
           that.$refs.headimg.setAttribute('src', baseurl + data.data.headimg)
+        })
+    },
+    allUser: function () {
+      let that = this
+      let baseurl = 'http://127.0.0.1:3000'
+      let cookieobj = this.alaysisCookie(document.cookie)
+      let Axios = axios.create({
+        baseURL: baseurl
+      })
+      Axios.defaults.headers.common['token'] = cookieobj.user
+      Axios.post('/alluser')
+        .then(function (data) {
+          that.alluser = data.data
+          that.displayAllUser()
+        })
+    },
+    resetPassword: function (e) {
+      let that = this
+      let userid = e.target.getAttribute('userid')
+      let baseurl = 'http://127.0.0.1:3000'
+      let cookieobj = this.alaysisCookie(document.cookie)
+      let Axios = axios.create({
+        baseURL: baseurl
+      })
+      Axios.defaults.headers.common['token'] = cookieobj.user
+      Axios.post('/resetPassword', {userid})
+        .then(function (data) {
+          if (data.data) {
+            that.waringBox('重置成功')
+          }
         })
     },
     getTable: function () {
@@ -556,10 +600,12 @@ export default {
         this.file = true
         this.table = false
         this.editor = false
+        this.adminflag = false
       } else {
         this.file = true
         this.table = false
         this.editor = false
+        this.adminflag = false
       }
     },
     displayTable: function (flag) {
@@ -573,16 +619,29 @@ export default {
         this.file = false
         this.table = true
         this.editor = false
+        this.adminflag = false
       } else {
         this.file = false
         this.table = true
         this.editor = false
+        this.adminflag = false
       }
     },
     displayEditor: function () {
       this.file = false
       this.table = false
       this.editor = true
+      this.adminflag = false
+    },
+    displayAllUser: function () {
+      if (this.editflag) {
+        this.waringBox('请先保存或不保存')
+        return false
+      }
+      this.adminflag = true
+      this.file = false
+      this.table = false
+      this.editor = false
     },
     nowTable: function (e) {
       if (this.editflag) {
@@ -945,6 +1004,10 @@ export default {
       }
     }
   },
+  components: {
+    Video,
+    Img
+  },
   created: function () {
     this.olddate = new Date().getTime()
     this.getUserdata()
@@ -960,7 +1023,6 @@ export default {
     this.$refs.filelist.addEventListener('click', this.displayImg)
     this.$refs.nowtable.addEventListener('click', this.nowTable)
     this.$refs.seachtlist.addEventListener('click', this.listNowTable)
-    this.$refs.myvideo.controls = true
   }
 }
 </script>
@@ -1019,6 +1081,7 @@ a {
 }
 
 span.updata {
+  cursor: pointer;
   position: absolute;
   top: 15px;
   right: 3%;
@@ -1388,6 +1451,72 @@ div.information div.userxiala {
   padding-left: 20px;
 }
 
+.content .alluser {
+  width: 100%;
+  font-size: 13px;
+}
+
+.content .alluser ul {
+  width: 100%;
+}
+
+.content .alluser ul li {
+  width: 100%;
+  height: 44px;
+  list-style: none;
+  line-height: 44px;
+  border-bottom: 0.5px solid #F4FBFF;
+  border-top: 0.5px solid #F4FBFF;
+}
+
+.content .alluser ul li:hover {
+  background-color: #F4FBFF;
+  border-bottom: 0.5px solid #DAEBFE;
+  border-top: 0.5px solid #DAEBFE;
+}
+
+.content .alluser div.top {
+  width: 100%;
+  color: #CACED0;
+  font-size: 13px;
+  margin-top: 10px;
+  border: none;
+}
+
+.content .alluser div.top:hover {
+  background-color: #F4FBFF;
+  border: none;
+}
+
+.content .alluser span {
+  display: inline-block;
+  padding-left: 20px;
+}
+
+.content .alluser span.reset {
+  cursor: pointer;
+  width: 35px;
+  height: 20px;
+  padding-left: 0;
+  line-height: 20px;
+  color: white;
+  background-color: royalblue;
+  text-align: center;
+  border-radius: 2px;
+}
+
+.content .alluser span.s1 {
+  width: 25%;
+}
+
+.content .alluser span.s2 {
+  width: 25%;
+}
+
+.content .alluser span.s3 {
+  width: 25%;
+}
+
 .warning {
   position: absolute;
   left: 43%;
@@ -1398,54 +1527,5 @@ div.information div.userxiala {
   text-align: center;
   border-radius: 20px;
   background-color: #ccc;
-}
-
-.displayimg {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 600px;
-  height: 400px;
-  transform: translateX(-50%) translateY(-50%);
-}
-
-.displayimg .iconfont {
-  cursor: pointer;
-  position: absolute;
-  right: 0;
-  font-size: 20px;
-}
-
-.displayimg img {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.displayvideo {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 600px;
-  height: 400px;
-  transform: translateX(-50%) translateY(-50%);
-}
-
-.displayvideo .icon-guanbi {
-  cursor: pointer;
-  position: absolute;
-  right: 0;
-  font-size: 20px;
-  z-index: 1;
-}
-
-.displayvideo .video {
-  width: 100%;
-  height: 100%;
-}
-
-.displayvideo .video video {
-  width: 100%;
-  height: 100%;
 }
 </style>

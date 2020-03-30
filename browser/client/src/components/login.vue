@@ -52,8 +52,6 @@ export default {
       verifyCode: ''
     }
   },
-  watch: {
-  },
   methods: {
     snowflake: function () {
       let that = this
