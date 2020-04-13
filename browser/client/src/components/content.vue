@@ -1,8 +1,8 @@
 <template>
   <div class="content">
-    <Liftside :tlist="tlist" :flist="flist" :tablelist="tablelist" @displaytable="displayTable" @displayfile="displayFile" @fileclass="fileClass" @nowtable="nowTable" />
+    <Liftside :tablelist="tablelist" @displaytable="displayTable" @displayfile="displayFile" @fileclass="fileClass" @nowtable="nowTable" />
 
-    <Displayfile v-show="file" :filelist="filelist" @uploadfile="uploadFile" @allfile="allFile" @seachfile="seachFile" @displayvideo="displayVideo" @deletefile="deleteFile" @displayimg="displayImg" />
+    <Displayfile v-show="file" :filelist="filelist" @waringbox="waringBox" @uploadfile="uploadFile" @allfile="allFile" @seachfile="seachFile" @displayvideo="displayVideo" @deletefile="deleteFile" @displayimg="displayImg" />
 
     <Displaytable v-show="table" :nowtable="nowtable" @waringbox="waringBox" @listnowtable="listNowTable" @gettable="getTable" @addtable="addTable" @edittable="editTable" />
 
@@ -26,9 +26,7 @@ export default {
       adminf: false,
       oldfield: '',
       file: true,
-      flist: false,
       table: false,
-      tlist: false,
       editor: false,
       editflag: false,
       addtable: true,
@@ -92,6 +90,13 @@ export default {
           } else {
             that.tablelist = data.data.tablename
             that.nowtable = data.data
+            that.nowtable.coldata = {}
+            for (let i = 0; i < data.data.tablefield.length; i++) {
+              that.nowtable.coldata[data.data.tablefield[i]] = []
+              for (let j = 0; j < data.data.table.length; j++) {
+                that.nowtable.coldata[data.data.tablefield[i]].push(data.data.table[j][data.data.tablefield[i]])
+              }
+            }
           }
         })
     },
@@ -285,7 +290,7 @@ export default {
         return false
       }
       if (!flag) {
-        this.flist = !this.flist
+        // this.flist = !this.flist
         this.file = true
         this.table = false
         this.editor = false
@@ -304,7 +309,7 @@ export default {
       }
       this.seachtlist = []
       if (!flag) {
-        this.tlist = !this.tlist
+        // this.tlist = !this.tlist
         this.file = false
         this.table = true
         this.editor = false
@@ -342,6 +347,13 @@ export default {
         Axios.post('/nowtabledata', {tablename})
           .then(data => {
             that.nowtable = data.data
+            that.nowtable.coldata = {}
+            for (let i = 0; i < data.data.tablefield.length; i++) {
+              that.nowtable.coldata[data.data.tablefield[i]] = []
+              for (let j = 0; j < data.data.table.length; j++) {
+                that.nowtable.coldata[data.data.tablefield[i]].push(data.data.table[j][data.data.tablefield[i]])
+              }
+            }
             that.oldfield = data.data.tablefield
             that.displayTable(true)
           })
@@ -398,6 +410,13 @@ export default {
           Axios.post('/nowtabledata', {tablename})
             .then(data => {
               that.nowtable = data.data
+              that.nowtable.coldata = {}
+              for (let i = 0; i < data.data.tablefield.length; i++) {
+                that.nowtable.coldata[data.data.tablefield[i]] = []
+                for (let j = 0; j < data.data.table.length; j++) {
+                  that.nowtable.coldata[data.data.tablefield[i]].push(data.data.table[j][data.data.tablefield[i]])
+                }
+              }
               that.oldfield = data.data.tablefield
               that.displayTable(true)
             })
@@ -426,6 +445,8 @@ ul {
 table {
   width: 80%;
   margin-top: 20px;
+  border-radius: 4px;
+  background-color: #718deb;
 }
 
 tr {
@@ -438,9 +459,10 @@ td {
 }
 
 th {
-  background-color: #555555;
+  background-color: #4f6ccc;
   color: white;
   font-weight: normal;
+  border: 1px solid #ccc;
 }
 
 a {
@@ -451,7 +473,9 @@ a {
 .content {
   width: 100%;
   height: 90%;
+  display: -webkit-flex;
   display: flex;
+  -webkit-justify-content: space-between;
   justify-content: space-between;
 }
 
@@ -471,6 +495,8 @@ a {
   color: white;
   text-align: center;
   line-height: 34px;
+  -webkit-bodrder-radius: 4px;
+  -moz-bodrder-radius: 4px;
   border-radius: 4px;
 }
 
@@ -484,6 +510,8 @@ a {
   height: 32px;
   width: 200px;
   padding: 0 0 0 20px;
+  -webkit-bodrder-radius: 32px;
+  -moz-bodrder-radius: 32px;
   border-radius: 32px;
   background-color: #cccccc;
   right: 200px;

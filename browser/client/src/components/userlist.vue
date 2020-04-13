@@ -76,26 +76,26 @@ export default {
   height: 44px;
   list-style: none;
   line-height: 44px;
-  border-bottom: 0.5px solid #F4FBFF;
-  border-top: 0.5px solid #F4FBFF;
+  border-bottom: 0.5px solid #87CEEB;
+  border-top: 0.5px solid #87CEEB;
 }
 
 .content .alluser ul li:hover {
-  background-color: #F4FBFF;
-  border-bottom: 0.5px solid #DAEBFE;
-  border-top: 0.5px solid #DAEBFE;
+  background-color: rgb(127, 189, 224);
+  border-bottom: 0.5px solid rgb(127, 189, 224);
+  border-top: 0.5px solid rgb(127, 189, 224);
 }
 
 .content .alluser div.top {
   width: 100%;
-  color: #CACED0;
+  color: royalblue;
   font-size: 13px;
   margin-top: 10px;
   border: none;
 }
 
 .content .alluser div.top:hover {
-  background-color: #F4FBFF;
+  background-color: rgb(127, 189, 224);
   border: none;
 }
 
@@ -109,10 +109,13 @@ export default {
   width: 35px;
   height: 20px;
   padding-left: 0;
+  margin-left: 20px;
   line-height: 20px;
   color: white;
   background-color: royalblue;
   text-align: center;
+  -webkit-bodrder-radius: 2px;
+  -moz-bodrder-radius: 2px;
   border-radius: 2px;
 }
 

@@ -22,7 +22,9 @@ export default {
   padding: 0 20px;
   line-height: 40px;
   text-align: center;
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
   border-radius: 20px;
-  background-color: #ccc;
+  background-color: royalblue;
 }
 </style>

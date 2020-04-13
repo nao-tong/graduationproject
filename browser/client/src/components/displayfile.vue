@@ -59,7 +59,7 @@ export default {
     seachFile: function () {
       let message = this.seachfile
       if (!message) {
-        this.seachfile = '请输入相关信息'
+        this.waringBox('请输入相关信息')
       } else {
         this.$emit('seachfile', message)
       }
@@ -72,6 +72,9 @@ export default {
     },
     displayImg: function (e) {
       this.$emit('displayimg', e)
+    },
+    waringBox: function (message) {
+      this.$emit('waringbox', message)
     }
   },
   mounted: function () {
@@ -97,14 +100,14 @@ ul {
 
 .file .bottom div.top {
   width: 100%;
-  color: #CACED0;
+  color: royalblue;
   font-size: 13px;
   margin-top: 10px;
   border: none;
 }
 
 .file .bottom div.top:hover {
-  background-color: #F4FBFF;
+  background-color: rgb(127, 189, 224);
   border: none;
 }
 
@@ -178,14 +181,14 @@ ul {
   height: 44px;
   list-style: none;
   line-height: 44px;
-  border-bottom: 0.5px solid #F4FBFF;
-  border-top: 0.5px solid #F4FBFF;
+  border-bottom: 0.5px solid #87CEEB;
+  border-top: 0.5px solid #87CEEB;
 }
 
 .file .bottom ul li:hover {
-  background-color: #F4FBFF;
-  border-bottom: 0.5px solid #DAEBFE;
-  border-top: 0.5px solid #DAEBFE;
+  background-color: rgb(127, 189, 224);
+  border-bottom: 0.5px solid rgb(127, 189, 224);
+  border-top: 0.5px solid rgb(127, 189, 224);
 }
 
 #avater {
@@ -196,6 +199,8 @@ ul {
   width: 84px;
   height: 34px;
   overflow: hidden;
+  -webkit-bodrder-radius: 4px;
+  -moz-bodrder-radius: 4px;
   border-radius: 4px;
 }
 

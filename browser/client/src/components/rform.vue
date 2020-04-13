@@ -163,162 +163,176 @@ export default {
 </script>
 
 <style scoped>
-        #rform {
-          width: 100%;
-          height: 100%;
-        }
-        /*表单样式*/
-        .form {
-            display: flex;
-            justify-content: space-between;
-            width: 600px;
-            height: 470px;
-            position: absolute;
-            top: 40%;
-            left: 50%;
-            margin-top: -150px;
-            margin-left: -300px;
-            opacity: 0.6;
-            background-color: #ccc;
-            border-radius: 5px;
-        }
+#rform {
+  width: 100%;
+  height: 100%;
+}
+/*表单样式*/
+.form {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-justify-content: space-between;
+  justify-content: space-between;
+  width: 600px;
+  height: 470px;
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  margin-top: -150px;
+  margin-left: -300px;
+  opacity: 0.6;
+  background-color: #ccc;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
 
-        .image {
-            width: 200px;
-            height: 200px;
-            margin-top: 100px;
-            margin-left: 20px;
-        }
+.image {
+  width: 200px;
+  height: 200px;
+  margin-top: 100px;
+  margin-left: 20px;
+}
 
-        img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-        }
+img {
+  width: 100%;
+  height: 100%;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  border-radius: 50%;
+}
 
-        .headimg {
-            position: absolute;
-            bottom: 50px;
-            left: 90px;
-        }
+.headimg {
+  position: absolute;
+  bottom: 50px;
+  left: 90px;
+}
 
-        #avater {
-            width: 56px;
-            height: 20px;
-            overflow: hidden;
-            position: absolute;
-            top: 348px;
-            left: 89px;
-        }
+#avater {
+  width: 56px;
+  height: 20px;
+  overflow: hidden;
+  position: absolute;
+  top: 348px;
+  left: 89px;
+}
 
-        #avater input {
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-        }
+#avater input {
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+}
 
-        form {
-            width: 200px;
-            height: 200px;
-            margin-top: 50px;
-        }
+form {
+  width: 200px;
+  height: 200px;
+  margin-top: 50px;
+}
 
-        #error {
-            position: absolute;
-            top: 10px;
-            left: 63%;
-            color: red;
-        }
+#error {
+  position: absolute;
+  top: 10px;
+  left: 63%;
+  color: red;
+}
 
-        .iconfont {
-            position: absolute;
-            top: 12px;
-            left: 10px;
-            width: 30px;
-            height: 30px;
-            font-size: 25px;
-        }
+.iconfont {
+  position: absolute;
+  top: 12px;
+  left: 10px;
+  width: 30px;
+  height: 30px;
+  font-size: 25px;
+}
 
-        .password .iconfont {
-            top: 13px;
-            left: 13px;
-            font-size: 20px;
-        }
+.password .iconfont {
+  top: 13px;
+  left: 13px;
+  font-size: 20px;
+}
 
-        .verificationCode .iconfont {
-            top: 13px;
-            left: 13px;
-            font-size: 21px;
-        }
+.verificationCode .iconfont {
+  top: 13px;
+  left: 13px;
+  font-size: 21px;
+}
 
-        .username,
-        .password,
-        .verificationCode {
-            position: relative;
-            left: -50%;
-            width: 250px;
-            height: 50px;
-            margin-top: 20px;
-            background: #E8F0FE;
-            border-radius: 50px;
-        }
+.username,
+.password,
+.verificationCode {
+  position: relative;
+  left: -50%;
+  width: 250px;
+  height: 50px;
+  margin-top: 20px;
+  background: #E8F0FE;
+  -webkit-border-radius: 50px;
+  -moz-border-radius: 50px;
+  border-radius: 50px;
+}
 
-        #username,
-        #nickname,
-        #password,
-        #verifyPassword,
-        #verificationCode {
-            position: absolute;
-            top: 8px;
-            left: 48px;
-            width: 80%;
-            height: 70%;
-            padding-left: 2px;
-            border-radius: 20px;
-            outline: none;
-            border: none;
-            background-color: #E8F0FE;
-        }
+#username,
+#nickname,
+#password,
+#verifyPassword,
+#verificationCode {
+  position: absolute;
+  top: 8px;
+  left: 48px;
+  width: 80%;
+  height: 70%;
+  padding-left: 2px;
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
+  border-radius: 20px;
+  outline: none;
+  border: none;
+  background-color: #E8F0FE;
+}
 
-        .verificationCode {
-            width: 150px;
-        }
+.verificationCode {
+  width: 150px;
+}
 
-        #verificationCode {
-            top: 14px;
-            width: 60%;
-            height: 40%;
-        }
+#verificationCode {
+  top: 14px;
+  width: 60%;
+  height: 40%;
+}
 
-        .verificationCodeImg {
-            position: absolute;
-            display: flex;
-            justify-content: space-between;
-            left: 103%;
-            width: 60%;
-            height: 100%;
-        }
+.verificationCodeImg {
+  position: absolute;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-justify-content: space-between;
+  justify-content: space-between;
+  left: 103%;
+  width: 60%;
+  height: 100%;
+}
 
-        .verificationCodeImg .svg {
-            width: 100%;
-            height: 100%;
-        }
+.verificationCodeImg .svg {
+  width: 100%;
+  height: 100%;
+}
 
-        .verificationCodeImg .svg svg{
-            width: 100%;
-            height: 100%;
-        }
+.verificationCodeImg .svg svg{
+  width: 100%;
+  height: 100%;
+}
 
-        .submit {
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 20px;
-            margin-left: -50%;
-            width: 250px;
-            height: 50px;
-            border: none;
-            outline: none;
-            background: #E8F0FE;
-            border-radius: 50px;
-        }
+.submit {
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px;
+  margin-left: -50%;
+  width: 250px;
+  height: 50px;
+  border: none;
+  outline: none;
+  background: #E8F0FE;
+  -webkit-border-radius: 50px;
+  -moz-border-radius: 50px;
+  border-radius: 50px;
+}
 </style>

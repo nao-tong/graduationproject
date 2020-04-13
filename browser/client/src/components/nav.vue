@@ -23,7 +23,7 @@
         <span>退出</span>
       </div>
     </div>
-    </div>
+  </div>
 </template>
 
 <script>
@@ -128,13 +128,15 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .nav {
   position: relative;
   width: 100%;
   height: 63px;
   line-height: 63px;
-  box-shadow: 0px 1px 3px 3px #cccccc;
+  -webkit-box-shadow: 0px 1px 3px 3px rgb(127, 189, 224);
+  -moz-box-shadow: 0px 1px 3px 3px rgb(127, 189, 224);
+  box-shadow: 0px 1px 3px 3px rgb(127, 189, 224);
 }
 
 #headimg {
@@ -144,6 +146,8 @@ export default {
   height: 40px;
   top: 10px;
   right: 10%;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
   border-radius: 50%;
 }
 
@@ -159,6 +163,8 @@ span.updata {
   background-color: royalblue;
   text-align: center;
   line-height: 34px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
   border-radius: 4px;
 }
 
@@ -167,7 +173,9 @@ div.information {
   width: 150px;
   top: 50px;
   right: 10%;
-  background-color: white;
+  background-color: rgb(137, 164, 243);
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
   border-radius: 5px;
   z-index: 100;
 }
@@ -175,11 +183,13 @@ div.information {
 div.information div.userxiala {
   cursor: pointer;
   padding: 5px 0;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
   border-radius: 5px;
 }
 
 div.information div.userxiala:hover {
-  background-color: #ccc;
+  background-color: rgb(127, 189, 224);
 }
 
 div.information div.user-username {
@@ -187,6 +197,8 @@ div.information div.user-username {
   height: 20px;
   padding: 5px 0;
   background-color: #2BC2FE;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
   border-radius: 5px;
   line-height: 20px;
 }

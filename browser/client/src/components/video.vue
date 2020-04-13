@@ -30,6 +30,8 @@ export default {
   top: 50%;
   width: 600px;
   height: 400px;
+  -webkit-transform: translateX(-50%) translateY(-50%);
+  -moz-transform: translateX(-50%) translateY(-50%);
   transform: translateX(-50%) translateY(-50%);
 }
 

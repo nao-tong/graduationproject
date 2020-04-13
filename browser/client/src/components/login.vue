@@ -250,7 +250,9 @@ export default {
 
 /*表单样式*/
 .form {
+  display: -webkit-flex;
   display: flex;
+  -webkit-justify-content: space-between;
   justify-content: space-between;
   width: 600px;
   height: 380px;
@@ -274,6 +276,8 @@ export default {
 img {
   width: 100%;
   height: 100%;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
   border-radius: 50%;
 }
 
@@ -307,7 +311,9 @@ form {
   width: 250px;
   height: 50px;
   margin-top: 20px;
-  background: #e8f0fe;
+  background-color: #e8f0fe;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
   border-radius: 50px;
 }
 
@@ -320,6 +326,8 @@ form {
   width: 80%;
   height: 70%;
   padding-left: 2px;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
   border-radius: 20px;
   outline: none;
   border: none;
@@ -338,7 +346,9 @@ form {
 
 .verificationCodeImg {
   position: absolute;
+  display: -webkit-flex;
   display: flex;
+  -webkit-justify-content: space-between;
   justify-content: space-between;
   left: 103%;
   width: 60%;
@@ -377,6 +387,8 @@ form {
   border: none;
   outline: none;
   background: #e8f0fe;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
   border-radius: 50px;
 }
 

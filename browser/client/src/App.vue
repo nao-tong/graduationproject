@@ -20,10 +20,24 @@ export default {
   },
   watch: {
     page: (newvalue, oldvalue) => {
-      window.location.href = '#/' + newvalue
+      if (!newvalue) {
+        window.location.href = '#/login'
+      } else {
+        window.location.href = '#/' + newvalue
+      }
     }
   },
   methods: {
+    alaysisCookie: cookie => {
+      var group = cookie.split(';')
+      var object = {}
+      for (let item in group) {
+        var key = group[item].split('=')[0] ? group[item].split('=')[0].trim() : 'msg'
+        var value = group[item].split('=')[1] ? group[item].split('=')[1].trim() : false
+        object[key] = value
+      }
+      return object
+    },
     changePage: function (page, alter) {
       this.page = page
       if (alter) {
@@ -40,6 +54,40 @@ export default {
       } else {
         this.page = 'psesonpage'
       }
+    },
+    delAllCookie: function () {
+      class Cookie {
+        constructor (cookieobj) {
+          this.name = cookieobj.name
+          this.value = cookieobj.value
+          this.t = cookieobj.time
+          this.p = cookieobj.path
+        }
+        init () {
+          var tim = parseFloat(this.t) * 3600 * 24 * 1000
+          var date = new Date()
+          var time = date.getTime() + tim
+          this.time = 'expires=' + (new Date(time)).toUTCString()
+          this.path = 'path=' + this.p
+          if (!tim) {
+            this.time = ''
+          }
+          if (!this.p) {
+            this.path = ''
+          }
+          document.cookie = this.name + '=' + this.value + ';' + this.time + ';' + this.path
+        }
+      }
+      let cookieobj = this.alaysisCookie(document.cookie)
+      for (let item in cookieobj) {
+        new Cookie({
+          name: item,
+          value: '',
+          time: -1,
+          path: '/'
+        }).init()
+      }
+      return '123'
     }
   },
   components: {
@@ -48,7 +96,9 @@ export default {
     Personpage
   },
   created: function () {
-    if (document.cookie) {
+    let cookieobj = this.alaysisCookie(document.cookie)
+    window.location.href = '#/login'
+    if (cookieobj.login && cookieobj.user) {
       this.page = 'personpage'
     }
   },
@@ -65,6 +115,7 @@ export default {
 html {
   width: 100%;
   height: 100%;
+  user-select:none;
 }
 body,div,form,table,th,td,tr,ul,li,a,span,img,input,button{
   margin: 0;
