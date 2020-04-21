@@ -300,7 +300,7 @@ export default {
             }
           }
         }
-      } else {}
+      } else { /* 其它选项 */ }
       let elearr = this.$refs.field.children
       for (let i = 0; i < elearr.length; i++) {
         elearr[i].setAttribute('class', '')
@@ -310,6 +310,10 @@ export default {
       this.selectfield = false
       this.xyflag = false
       this.charttype = ''
+      let elearr = this.$refs.field.children
+      for (let i = 0; i < elearr.length; i++) {
+        elearr[i].setAttribute('class', '')
+      }
     },
     setShadow: function (e) {
       let ele = e.target

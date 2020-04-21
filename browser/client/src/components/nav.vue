@@ -70,6 +70,7 @@ export default {
         })
     },
     exit: function () {
+      let that = this
       class Cookie {
         constructor (cookieobj) {
           this.name = cookieobj.name
@@ -92,21 +93,30 @@ export default {
           document.cookie = this.name + '=' + this.value + ';' + this.time + ';' + this.path
         }
       }
-      let exit = new Cookie({
+      let cookieobj = this.alaysisCookie(document.cookie)
+      let login = new Cookie({
         name: 'login',
         value: '',
         time: -1,
         path: '/'
       })
-      let et = new Cookie({
+      let user = new Cookie({
         name: 'user',
         value: '',
         time: -1,
         path: '/'
       })
-      exit.init()
-      et.init()
-      this.$emit('changepage', 'login')
+      login.init()
+      user.init()
+      axios.post('/user/loginflag', {
+        userid: cookieobj.login,
+        loginflag: 0
+      })
+        .then(function () {
+          sessionStorage.removeItem('login')
+          sessionStorage.removeItem('user')
+          that.$emit('changepage', 'login')
+        })
     },
     allUser: function () {
       let that = this

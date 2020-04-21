@@ -58,22 +58,23 @@ let file = [];
 /**
  * 登录
  */
-//判断用户是否存在,用于登录时获取头像
+//判断用户是否存在,用于登录时获取头像,并判断用户是否在线
 user.get('/user/judgment', function (req, res) {
     let userid = req.query.userid;
     let account = {};
     try {
-        usertable.findOne(userid, function (userdata) {
-            if (!userdata) {
-                account.userid = false;
-                account.msg = 'user dose not exist';
-                res.send(account)
-            } else {
-                account.userid = true;
-                account.headimg = userdata.headimg;
-                res.send(account)
-            }
-        })
+      usertable.findOne(userid, function (userdata) {
+        if (!userdata) {
+          account.userid = false;
+          account.msg = 'user dose not exist';
+          res.send(account)
+        } else {
+          account.userid = true;
+          account.login = userdata.login ? false : true;
+          account.headimg = userdata.headimg;
+          res.send(account)
+        }
+      })
     } catch (error) {
         fs.writeFile('../log.txt', '"' + error + '"', function (err) {
             if (err) {
@@ -135,9 +136,23 @@ user.post('/user/login', function (req, res) {
             account.token = jwt.generateToken();
             account.password = true;
             account.msg = 'password right';
+            account.login = userdata.login ? false : true;
             res.send(account);
         }
     })
+})
+
+user.post('/user/loginflag', function (req, res) {
+  let userobj = {}
+  userobj.login = req.body.loginflag
+  if (typeof (req.body.userid) !== 'string') {
+    userobj.userid = req.body.userid
+  } else {
+    userobj.userid = aes.Decrypt(req.body.userid)
+  }
+  usertable.upDate(userobj, function () {
+    res.send()
+  })
 })
 
 /**

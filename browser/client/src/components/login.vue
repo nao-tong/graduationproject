@@ -52,6 +52,14 @@ export default {
       verifyCode: ''
     }
   },
+  props: ['page'],
+  watch: {
+    page: function () {
+      if (this.timer) {
+        clearInterval(this.timer)
+      }
+    }
+  },
   methods: {
     snowflake: function () {
       let that = this
@@ -127,8 +135,12 @@ export default {
             if (!data.data.userid) {
               that.$refs.error.innerHTML = '账号不存在'
             } else {
-              that.$refs.error.innerHTML = ''
-              that.$refs.headimg.setAttribute('src', baseurl + data.data.headimg)
+              if (data.data.login) {
+                that.$refs.error.innerHTML = ''
+                that.$refs.headimg.setAttribute('src', baseurl + data.data.headimg)
+              } else {
+                that.$refs.error.innerHTML = '用户已在线'
+              }
             }
           }, function () {
             that.$refs.error.innerHTML = '服务器错误'
@@ -184,6 +196,12 @@ export default {
                   that.$refs.svg.children[0].style.width = '100%'
                 })
             } else {
+              if (!data.data.login) {
+                console.log(data.data)
+                that.$refs.error.innerHTML = '用户已在线'
+                return
+              }
+              that.$refs.error.innerHTML = ''
               let user = new Cookie({
                 name: 'user',
                 value: data.data.token,
@@ -196,10 +214,16 @@ export default {
                 time: 1,
                 path: '/'
               })
+              sessionStorage.setItem('user', data.data.token)
+              sessionStorage.setItem('login', data.data.id)
               user.init()
               login.init()
               clearInterval(that.timer)
               that.$emit('changepage', 'personpage')
+              axios.post('/user/loginflag', {
+                userid: Number(userid),
+                loginflag: 1
+              })
             }
           })
       } else {

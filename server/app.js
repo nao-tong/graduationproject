@@ -1,7 +1,6 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-
 const user = require('./router/user')
 const svg = require('./router/svg')
 const JwtUtil = require('./encapsulation/jwt')

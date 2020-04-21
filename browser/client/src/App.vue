@@ -1,12 +1,13 @@
 <template>
   <div id="app">
-    <Login v-if="page === 'login'" @changepage="changePage" />
+    <Login v-if="page === 'login'" :page="page" @changepage="changePage" />
     <Register v-else-if="page === 'register'" @changepage="changePage" :alter="alter" />
     <Personpage v-else @changepage="changePage" />
   </div>
 </template>
 
 <script>
+import axios from 'axios'
 import Login from './components/login'
 import Register from './components/register'
 import Personpage from './components/personpage'
@@ -95,12 +96,68 @@ export default {
     Register,
     Personpage
   },
+  beforeCreate: function () {
+    let that = this
+    class Cookie {
+      constructor (cookieobj) {
+        this.name = cookieobj.name
+        this.value = cookieobj.value
+        this.t = cookieobj.time
+        this.p = cookieobj.path
+      }
+      init () {
+        var tim = parseFloat(this.t) * 3600 * 24 * 1000
+        var date = new Date()
+        var time = date.getTime() + tim
+        this.time = 'expires=' + (new Date(time)).toUTCString()
+        this.path = 'path=' + this.p
+        if (!tim) {
+          this.time = ''
+        }
+        if (!this.p) {
+          this.path = ''
+        }
+        document.cookie = this.name + '=' + this.value + ';' + this.time + ';' + this.path
+      }
+    }
+    let arr = ['length', 'clear', 'setItem', 'getItem', 'key', 'removeItem']
+    for (let item in sessionStorage) {
+      if (arr.indexOf(item) !== -1) continue
+      let cookie = new Cookie({
+        name: item,
+        value: sessionStorage[item],
+        time: 1,
+        path: '/'
+      })
+      cookie.init()
+    }
+    window.onbeforeunload = function () {
+      let cookieobj = that.alaysisCookie(document.cookie)
+      for (let item in cookieobj) {
+        let cookie = new Cookie({
+          name: item,
+          value: '',
+          time: -1,
+          path: '/'
+        })
+        cookie.init()
+      }
+      axios.post('/user/loginflag', {
+        userid: cookieobj.login,
+        loginflag: 0
+      })
+    }
+  },
   created: function () {
     let cookieobj = this.alaysisCookie(document.cookie)
-    window.location.href = '#/login'
     if (cookieobj.login && cookieobj.user) {
+      axios.post('/user/loginflag', {
+        userid: cookieobj.login,
+        loginflag: 1
+      })
       this.page = 'personpage'
     }
+    window.location.href = '#/login'
   },
   mounted: function () {
     let that = this

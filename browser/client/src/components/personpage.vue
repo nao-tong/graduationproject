@@ -86,9 +86,6 @@ export default {
 #ppp {
   width: 100%;
   height: 100%;
-  /*
-    #87CEEB
-  */
   background-image: linear-gradient(to right, #87CEEB, rgb(34, 190, 238));
   overflow: auto;
 }
