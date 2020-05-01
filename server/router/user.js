@@ -142,6 +142,7 @@ user.post('/user/login', function (req, res) {
     })
 })
 
+//下线
 user.post('/user/loginflag', function (req, res) {
   let userobj = {}
   userobj.login = req.body.loginflag
@@ -150,9 +151,11 @@ user.post('/user/loginflag', function (req, res) {
   } else {
     userobj.userid = aes.Decrypt(req.body.userid)
   }
-  usertable.upDate(userobj, function () {
-    res.send()
-  })
+  if (userobj.userid || userobj.userid == 0) {
+    usertable.upDate(userobj, function () {
+      res.send({msg: '下线成功', useroffline: true})
+    })
+  }
 })
 
 /**

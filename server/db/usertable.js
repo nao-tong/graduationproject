@@ -21,7 +21,7 @@ var connectdb = function () {
 function addUser(userobject, callback) {
     connectdb();
     connection.connect();
-    connection.query('INSERT INTO user (username,userid,password,headimg,admin) VALUES (' + '"' + userobject.username + '"' + ',' + '"' + userobject.userid + '"' + ',' + '"' + userobject.password + '"' + ',' + '"' + userobject.headimg + '"' + ',' + userobject.admin + ')', function (error, results, fields) {
+    connection.query('INSERT INTO user (username,userid,password,headimg,admin,login) VALUES (' + '"' + userobject.username + '"' + ',' + '"' + userobject.userid + '"' + ',' + '"' + userobject.password + '"' + ',' + '"' + userobject.headimg + '"' + ',' + userobject.admin + ',' + 0 + ')', function (error, results, fields) {
         if (error) throw error;
         callback(results.affectedRows);
     });

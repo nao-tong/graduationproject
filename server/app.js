@@ -1,11 +1,14 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const aes = require('./encAnddec/aes')
 const user = require('./router/user')
 const svg = require('./router/svg')
+const usertable = require('./db/usertable')
 const JwtUtil = require('./encapsulation/jwt')
 
 var app = express();
+let overtimeuser = {};
 
 /* 跨域设置 */
 app.all('*', function(req, res, next) {
@@ -23,21 +26,39 @@ app.use('/node_modules/', express.static(path.join(__dirname, './node_modules/')
 app.use('/upload/', express.static(path.join(__dirname, './upload/')));
 
 app.use(function (req, res, next) {
-    // 我这里只是把登陆和注册请求去掉了，其他的多有请求都需要进行token校验 
+    // 我这里只是把登陆和注册请求去掉了，其他的多有请求都需要进行token校验
     flag = req.url.indexOf('/user') == -1 ? true : false
-    flag = flag && req.url != '/svg' && req.url != '/' && req.url != "/favicon.ico"
+    flag = flag && req.url != '/svg' && req.url != '/' && req.url != "/src/assets/favicon.ico"
+    let overtimeflag = false;
     if (flag) {
         let token = req.headers.token;
+        let userid = req.headers.userid ? String(aes.Decrypt(req.headers.userid)) : false;
         let jwt = new JwtUtil(token);
         let result = jwt.verifyToken();
-        // 如果考验通过就next，否则就返回登陆信息不正确
-        if (result == 'err') {
-            res.send({status: 403, msg: '身份信息已过期,请重新登录'});
+        let nowdate = (new Date()).getTime();
+        if (!userid) {
+        } else if (!overtimeuser[userid]) {
+          overtimeuser[userid] = nowdate;
         } else {
-            next();
+          if ((nowdate - Number(overtimeuser[userid])) > 3600000) {
+            overtimeflag = true;
+          }
+        }
+        // 如果考验通过就next，否则就返回登陆信息不正确
+        if (result == 'err' || overtimeflag) {
+            // 下线操作(前端完成)
+          res.send({status: 403, msg: '身份信息已过期,请重新登录', offline: true});
+        } else {
+          usertable.findOne(userid, function (data) {
+            if (data.login) {
+              next();
+            } else {
+              res.send({status: 403, msg: '身份信息已过期,请重新登录', offline: true});
+            }
+          })
         }
     } else {
-        next();
+      next();
     }
 })
 
