@@ -56,6 +56,9 @@ export default {
       }
       return object
     },
+    exit: function () {
+      this.$emit('Emit')
+    },
     getTable: function () {
       this.$emit('gettable')
     },
@@ -164,6 +167,7 @@ export default {
       }
       let editcolth = document.getElementsByClassName('editcol')[0].children
       let addcol = document.getElementsByClassName('addcol')
+      // 检查字段是否合法
       for (let i = 0; i < editcolth.length; i++) {
         // 字段为空
         if (!editcolth[i].children[0].value) {
@@ -196,13 +200,32 @@ export default {
         }
         tableobj.field.push(editcolth[i].children[0].value)
       }
+      // 行数据
       let editrow = document.getElementsByClassName('editrow')
       for (let i = 0; i < editrow.length; i++) {
+        let k = 0
+        let emptyrow = false
+        let rowindex
         let obj = {}
         for (let j = 0; j < editcolth.length; j++) {
           obj[tableobj.field[j]] = editrow[i].children[j].children[0].value
+          if (!editrow[i].children[j].children[0].value) {
+            k++
+            if (k === editcolth.length) {
+              emptyrow = true
+              if (editrow[i].getAttribute('id')) {
+                rowindex = editrow[i].getAttribute('id').split('editrow')[1]
+              }
+            }
+          }
         }
-        tableobj.rowdata.push(obj)
+        if (!emptyrow) {
+          tableobj.rowdata.push(obj)
+        } else {
+          if (this.editflag) {
+            tableobj.delrowdata.push(rowindex)
+          }
+        }
       }
       if (!tableobj.tablename) {
         this.waringBox('表名不能为空')
@@ -225,13 +248,17 @@ export default {
           Axios.defaults.headers.common['userid'] = cookieobj.login
           Axios.post('/addtable', tableobj)
             .then(data => {
-              if (data.data.success) {
-                that.getTable()
-                that.displayTable()
-                that.notSave()
-                that.waringBox('保存成功')
+              if (data.data.offline) {
+                that.exit()
               } else {
-                that.waringBox('此表已存在')
+                if (data.data.success) {
+                  that.getTable()
+                  that.displayTable()
+                  that.notSave()
+                  that.waringBox('保存成功')
+                } else {
+                  that.waringBox('此表已存在')
+                }
               }
             })
         } else {
@@ -287,14 +314,18 @@ export default {
           Axios.defaults.headers.common['userid'] = cookieobj.login
           Axios.post('/edittable', tableobj)
             .then(data => {
-              if (data.data.success) {
-                that.$emit('ceditflag', false)
-                that.getTable()
-                that.displayTable()
-                that.notSave()
-                that.waringBox('保存成功')
+              if (data.data.offline) {
+                that.exit()
               } else {
-                that.waringBox('保存失败')
+                if (data.data.success) {
+                  that.$emit('ceditflag', false)
+                  that.getTable()
+                  that.displayTable()
+                  that.notSave()
+                  that.waringBox('保存成功')
+                } else {
+                  that.waringBox('保存失败')
+                }
               }
             })
         }

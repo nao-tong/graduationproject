@@ -4,7 +4,7 @@
         <span class="s s1">账号</span>
         <span class="s s2">用户名</span>
         <span class="s s3">用户类型</span>
-        <span>重置密码</span>
+        <span>重置密码/强制下线</span>
       </div>
       <ul>
         <li v-for="(user,key) in alluser" :key="key">
@@ -12,7 +12,10 @@
           <span class="s s2">{{ user.username }}</span>
           <span v-if="user.admin === 0" class="s s3">管理员</span>
           <span v-else class="s s3">普通用户</span>
-          <span @click="resetPassword" class="reset" :userid="user.userid">重置</span>
+          <div>
+            <span @click="resetPassword" class="reset" :userid="user.userid">重置</span>
+            <span class="offline" @click="offLine" :userid="user.userid">下线</span>
+          </div>
         </li>
       </ul>
     </div>
@@ -38,6 +41,9 @@ export default {
       }
       return object
     },
+    exit: function () {
+      this.$emit('Exit')
+    },
     resetPassword: function (e) {
       let that = this
       let userid = e.target.getAttribute('userid')
@@ -47,10 +53,39 @@ export default {
         baseURL: baseurl
       })
       Axios.defaults.headers.common['token'] = cookieobj.user
+      Axios.defaults.headers.common['userid'] = cookieobj.login
       Axios.post('/resetPassword', {userid})
         .then(function (data) {
-          if (data.data) {
-            that.waringBox('重置成功')
+          if (data.data.offline) {
+            that.exit()
+          } else {
+            if (data.data) {
+              that.waringBox('重置成功')
+            }
+          }
+        })
+    },
+    offLine: function (e) {
+      let that = this
+      let userid = e.target.getAttribute('userid')
+      let baseurl = 'http://127.0.0.1:3000'
+      let cookieobj = this.alaysisCookie(document.cookie)
+      let Axios = axios.create({
+        baseURL: baseurl
+      })
+      Axios.defaults.headers.common['token'] = cookieobj.user
+      Axios.defaults.headers.common['userid'] = cookieobj.login
+      Axios.post('/user/loginflag', {
+        userid: Number(userid),
+        loginflag: 0
+      })
+        .then(function (data) {
+          if (data.data.offline) {
+            that.exit()
+          } else {
+            if (data.data.useroffline) {
+              that.waringBox('下线成功')
+            }
           }
         })
     },
@@ -104,12 +139,17 @@ export default {
   padding-left: 20px;
 }
 
-.content .alluser span.reset {
+.content .alluser ul div {
+  display: inline-block;
+  margin-left: 20px;
+}
+
+.content .alluser span.reset,.content .alluser span.offline {
   cursor: pointer;
   width: 35px;
   height: 20px;
   padding-left: 0;
-  margin-left: 20px;
+  margin-left: 10px;
   line-height: 20px;
   color: white;
   background-color: royalblue;

@@ -59,64 +59,23 @@ export default {
         baseURL: baseurl
       })
       Axios.defaults.headers.common['token'] = cookieobj.user
+      Axios.defaults.headers.common['userid'] = cookieobj.login
       Axios.post('/datauser', {userid: cookieobj.login})
         .then(function (data) {
-          if (data.data.admin === 0) {
-            that.admin = true
-            that.$emit('changeadmin', true)
+          if (data.data.offline) {
+            that.exit()
+          } else {
+            if (data.data.admin === 0) {
+              that.admin = true
+              that.$emit('changeadmin', true)
+            }
+            that.username = data.data.username
+            that.$refs.headimg.setAttribute('src', baseurl + data.data.headimg)
           }
-          that.username = data.data.username
-          that.$refs.headimg.setAttribute('src', baseurl + data.data.headimg)
         })
     },
     exit: function () {
-      let that = this
-      class Cookie {
-        constructor (cookieobj) {
-          this.name = cookieobj.name
-          this.value = cookieobj.value
-          this.t = cookieobj.time
-          this.p = cookieobj.path
-        }
-        init () {
-          var tim = parseFloat(this.t) * 3600 * 24 * 1000
-          var date = new Date()
-          var time = date.getTime() + tim
-          this.time = 'expires=' + (new Date(time)).toUTCString()
-          this.path = 'path=' + this.p
-          if (!tim) {
-            this.time = ''
-          }
-          if (!this.p) {
-            this.path = ''
-          }
-          document.cookie = this.name + '=' + this.value + ';' + this.time + ';' + this.path
-        }
-      }
-      let cookieobj = this.alaysisCookie(document.cookie)
-      let login = new Cookie({
-        name: 'login',
-        value: '',
-        time: -1,
-        path: '/'
-      })
-      let user = new Cookie({
-        name: 'user',
-        value: '',
-        time: -1,
-        path: '/'
-      })
-      login.init()
-      user.init()
-      axios.post('/user/loginflag', {
-        userid: cookieobj.login,
-        loginflag: 0
-      })
-        .then(function () {
-          sessionStorage.removeItem('login')
-          sessionStorage.removeItem('user')
-          that.$emit('changepage', 'login')
-        })
+      this.$emit('Exit')
     },
     allUser: function () {
       let that = this
@@ -126,13 +85,18 @@ export default {
         baseURL: baseurl
       })
       Axios.defaults.headers.common['token'] = cookieobj.user
+      Axios.defaults.headers.common['userid'] = cookieobj.login
       Axios.post('/alluser')
         .then(function (data) {
-          that.$emit('alluser', data.data, true)
+          if (data.data.offline) {
+            that.exit()
+          } else {
+            that.$emit('alluser', data.data, true)
+          }
         })
     }
   },
-  created: function () {
+  mounted: function () {
     this.getUserdata()
   }
 }

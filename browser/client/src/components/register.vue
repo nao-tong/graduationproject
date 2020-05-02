@@ -1,7 +1,7 @@
 <template>
   <div id="rpp">
     <Rform v-if="register" @changepage="changePage" />
-    <Uform v-else @changepage="changePage" />
+    <Uform v-else @changepage="changePage" @Exit="exit" />
   </div>
 </template>
 
@@ -20,6 +20,9 @@ export default {
   methods: {
     changePage: function (page) {
       this.changepage = page
+    },
+    exit: function () {
+      this.$emit('Exit')
     }
   },
   watch: {

@@ -27,9 +27,13 @@ app.use('/upload/', express.static(path.join(__dirname, './upload/')));
 
 app.use(function (req, res, next) {
     // 我这里只是把登陆和注册请求去掉了，其他的多有请求都需要进行token校验
-    flag = req.url.indexOf('/user') == -1 ? true : false
-    flag = flag && req.url != '/svg' && req.url != '/' && req.url != "/src/assets/favicon.ico"
+    flag = req.url.indexOf('/user') == -1 ? false : true
+    flag = !(flag || req.url == '/svg' || req.url == '/' || req.url == "/favicon.ico")
     let overtimeflag = false;
+    if (req.method === 'OPTIONS') {
+      next();
+      return
+    }
     if (flag) {
         let token = req.headers.token;
         let userid = req.headers.userid ? String(aes.Decrypt(req.headers.userid)) : false;
@@ -46,16 +50,24 @@ app.use(function (req, res, next) {
         }
         // 如果考验通过就next，否则就返回登陆信息不正确
         if (result == 'err' || overtimeflag) {
+          console.log(req.url, userid, overtimeflag, result, token)
             // 下线操作(前端完成)
           res.send({status: 403, msg: '身份信息已过期,请重新登录', offline: true});
         } else {
-          usertable.findOne(userid, function (data) {
-            if (data.login) {
-              next();
-            } else {
-              res.send({status: 403, msg: '身份信息已过期,请重新登录', offline: true});
-            }
+          new Promise(function (resolve, reject) {
+            usertable.findOne(userid, function (data) {
+              if (data.login) {
+                resolve(data.login)
+              } else {
+                reject(data.login)
+              }
+            })
           })
+            .then(function (data) {
+              next();
+            }, function (data) {
+              res.send({status: 403, msg: '身份信息已过期,请重新登录', offline: true});
+            })
         }
     } else {
       next();

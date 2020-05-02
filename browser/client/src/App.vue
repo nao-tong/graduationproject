@@ -1,8 +1,8 @@
 <template>
   <div id="app">
     <Login v-if="page === 'login'" :page="page" @changepage="changePage" />
-    <Register v-else-if="page === 'register'" @changepage="changePage" :alter="alter" />
-    <Personpage v-else @changepage="changePage" />
+    <Register v-else-if="page === 'register'" @Exit="exit" @changepage="changePage" :alter="alter" />
+    <Personpage v-else @changepage="changePage" @Exit="exit" />
   </div>
 </template>
 
@@ -89,6 +89,55 @@ export default {
         }).init()
       }
       return '123'
+    },
+    exit: function () {
+      let that = this
+      class Cookie {
+        constructor (cookieobj) {
+          this.name = cookieobj.name
+          this.value = cookieobj.value
+          this.t = cookieobj.time
+          this.p = cookieobj.path
+        }
+        init () {
+          var tim = parseFloat(this.t) * 3600 * 24 * 1000
+          var date = new Date()
+          var time = date.getTime() + tim
+          this.time = 'expires=' + (new Date(time)).toUTCString()
+          this.path = 'path=' + this.p
+          if (!tim) {
+            this.time = ''
+          }
+          if (!this.p) {
+            this.path = ''
+          }
+          document.cookie = this.name + '=' + this.value + ';' + this.time + ';' + this.path
+        }
+      }
+      let cookieobj = this.alaysisCookie(document.cookie)
+      let login = new Cookie({
+        name: 'login',
+        value: '',
+        time: -1,
+        path: '/'
+      })
+      let user = new Cookie({
+        name: 'user',
+        value: '',
+        time: -1,
+        path: '/'
+      })
+      login.init()
+      user.init()
+      axios.post('/user/loginflag', {
+        userid: cookieobj.login,
+        loginflag: 0
+      })
+        .then(function () {
+          sessionStorage.removeItem('login')
+          sessionStorage.removeItem('user')
+          that.changePage('login')
+        })
     }
   },
   components: {

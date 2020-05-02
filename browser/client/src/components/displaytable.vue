@@ -21,7 +21,7 @@
 
     <div v-show="seachtlist.length === 0" class="bottom usertable">
       <div class="formbox" id="tablebox">
-        <table border="1" frame="void" cellspacing="0" rules="groups">
+        <table border="1" frame="void" cellspacing="0" rules="groups" v-show="nowtable.tablename">
           <caption v-if="typeof(nowtable.tablename) === 'object'" class="delcaption">{{ nowtable.tablename[0] }}</caption>
           <caption v-else>{{ nowtable.tablename }}</caption>
           <tr class="col">
@@ -110,6 +110,9 @@ export default {
       }
       return object
     },
+    exit: function () {
+      this.$emit('Emit')
+    },
     deleteTable: function () {
       let that = this
       let tablename
@@ -127,9 +130,13 @@ export default {
       Axios.defaults.headers.common['userid'] = cookieobj.login
       Axios.post('/deletetable', { tablename })
         .then(data => {
-          if (data.data.delete) {
-            that.$emit('waringbox', '删除成功')
-            that.$emit('gettable')
+          if (data.data.offline) {
+            that.exit()
+          } else {
+            if (data.data.delete) {
+              that.$emit('waringbox', '删除成功')
+              that.$emit('gettable')
+            }
           }
         })
     },
@@ -148,10 +155,14 @@ export default {
         Axios.defaults.headers.common['userid'] = cookieobj.login
         Axios.post('/querytable', { message })
           .then(data => {
-            if (data.data.table.length) {
-              that.seachtlist = data.data.table
+            if (data.data.offline) {
+              that.exit()
             } else {
-              that.waringBox('无此表')
+              if (data.data.table.length) {
+                that.seachtlist = data.data.table
+              } else {
+                that.waringBox('无此表')
+              }
             }
           })
       }

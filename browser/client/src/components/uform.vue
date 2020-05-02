@@ -47,8 +47,6 @@
 
 <script>
 import axios from 'axios'
-let baseurl = 'http://127.0.0.1:3000'
-axios.defaults.baseURL = baseurl
 export default {
   name: 'Uform',
   data () {
@@ -73,10 +71,17 @@ export default {
       }
       return object
     },
+    exit: function () {
+      this.$emit('Exit')
+    },
     refreshSvg: function (e) {
       let that = this
       e.target.parentNode.removeChild(e.target)
-      axios.get('/svg')
+      let baseurl = 'http://127.0.0.1:3000'
+      let Axios = axios.create({
+        baseurl
+      })
+      Axios.get('/svg')
         .then(function (data) {
           that.svgtext = data.data.text
           that.$refs.svg.innerHTML = data.data.data
@@ -85,15 +90,21 @@ export default {
     },
     getUserdata: function (cookieobj) {
       let that = this
+      let baseurl = 'http://127.0.0.1:3000'
       let Axios = axios.create({
-        baseurl: 'http://127.0.0.1:3000'
+        baseurl
       })
       Axios.defaults.headers.common['token'] = this.alaysisCookie(document.cookie).user
+      Axios.defaults.headers.common['userid'] = this.alaysisCookie(document.cookie).login
       Axios.post('/datauser', {userid: cookieobj.login})
         .then(function (data) {
-          that.$refs.headimgid.setAttribute('src', baseurl + data.data.headimg)
-          that.userid = data.data.userid
-          that.nickname = data.data.username
+          if (data.data.offline) {
+            that.exit()
+          } else {
+            that.$refs.headimgid.setAttribute('src', baseurl + data.data.headimg)
+            that.userid = data.data.userid
+            that.nickname = data.data.username
+          }
         })
     },
     uploadHeadimg: function () {
@@ -102,7 +113,13 @@ export default {
       let filetype = img.files[0].name.split('.')[1]
       if (filetype === 'jpg' || filetype === 'png') {
         let imgform = new FormData(this.$refs.avater)
-        axios.post('/user/upload', imgform, {
+        let baseurl = 'http://127.0.0.1:3000'
+        let Axios = axios.create({
+          baseurl
+        })
+        Axios.defaults.headers.common['token'] = this.alaysisCookie(document.cookie).user
+        Axios.defaults.headers.common['userid'] = this.alaysisCookie(document.cookie).login
+        Axios.post('/user/upload', imgform, {
           'Content-Type': 'multipart/form-data'
         })
           .then(function (data) {
@@ -118,6 +135,7 @@ export default {
         baseurl: 'http://127.0.0.1:3000'
       })
       Axios.defaults.headers.common['token'] = this.alaysisCookie(document.cookie).user
+      Axios.defaults.headers.common['userid'] = this.alaysisCookie(document.cookie).login
       let that = this
       let userid = this.userid
       let nickname = this.nickname
@@ -154,15 +172,19 @@ export default {
           imgindex
         })
           .then(function (data) {
-            if (data.data.password) {
-              if (data.data.account) {
-                that.$refs.error.innerHTML = '修改成功'
-                that.$emit('changepage', 'personpage')
-              } else {
-                that.$refs.error.innerHTML = '修改失败'
-              }
+            if (data.data.offline) {
+              that.exit()
             } else {
-              that.$refs.error.innerHTML = '原密码错误'
+              if (data.data.password) {
+                if (data.data.account) {
+                  that.$refs.error.innerHTML = '修改成功'
+                  that.$emit('changepage', 'personpage')
+                } else {
+                  that.$refs.error.innerHTML = '修改失败'
+                }
+              } else {
+                that.$refs.error.innerHTML = '原密码错误'
+              }
             }
           })
       }

@@ -2,12 +2,12 @@
   <div class="content">
     <Liftside :tablelist="tablelist" @displaytable="displayTable" @displayfile="displayFile" @fileclass="fileClass" @nowtable="nowTable" />
 
-    <Displayfile v-show="file" :filelist="filelist" @waringbox="waringBox" @uploadfile="uploadFile" @allfile="allFile" @seachfile="seachFile" @displayvideo="displayVideo" @deletefile="deleteFile" @displayimg="displayImg" />
+    <Displayfile v-show="file" :filelist="filelist" @Exit="exit" @waringbox="waringBox" @uploadfile="uploadFile" @allfile="allFile" @seachfile="seachFile" @displayvideo="displayVideo" @deletefile="deleteFile" @displayimg="displayImg" />
 
-    <Displaytable v-show="table" :nowtable="nowtable" @waringbox="waringBox" @listnowtable="listNowTable" @gettable="getTable" @addtable="addTable" @edittable="editTable" />
+    <Displaytable v-show="table" :nowtable="nowtable" @Exit="exit" @waringbox="waringBox" @listnowtable="listNowTable" @gettable="getTable" @addtable="addTable" @edittable="editTable" />
 
-    <Edittable v-show="editor" :oldfield="oldfield" :editflag="editflag" :addeditflag="addeditflag" :edittable="edittable" @gettable="getTable" @waringbox="waringBox" @ceditflag="cEditflag" @caddeditflag="cAddeditflag" @displaytable="displayTable" />
-    <Userlist v-if="admin" v-show="adminflag" :alluser="alluser" @waringbox="waringBox" />
+    <Edittable v-show="editor" :oldfield="oldfield" @Exit="exit" :editflag="editflag" :addeditflag="addeditflag" :edittable="edittable" @gettable="getTable" @waringbox="waringBox" @ceditflag="cEditflag" @caddeditflag="cAddeditflag" @displaytable="displayTable" />
+    <Userlist v-if="admin" v-show="adminflag" :alluser="alluser" @Exit="exit" @waringbox="waringBox" />
   </div>
 </template>
 
@@ -70,6 +70,9 @@ export default {
       }
       return object
     },
+    exit: function () {
+      this.$emit('Exit')
+    },
     getTable: function () {
       let that = this
       let baseurl = 'http://127.0.0.1:3000'
@@ -78,23 +81,24 @@ export default {
         baseURL: baseurl
       })
       Axios.defaults.headers.common['token'] = cookieobj.user
+      Axios.defaults.headers.common['userid'] = cookieobj.login
       Axios.post('/alltable', {userid: cookieobj.login})
         .then(function (data) {
-          that.oldfield = data.data.tablefield
-          if (!data.data.message) {
-            that.waring = true
-            that.waringtext = '请添加表格'
-            setTimeout(() => {
-              that.waring = false
-            }, 1500)
+          if (data.data.offline) {
+            that.exit()
           } else {
-            that.tablelist = data.data.tablename
-            that.nowtable = data.data
-            that.nowtable.coldata = {}
-            for (let i = 0; i < data.data.tablefield.length; i++) {
-              that.nowtable.coldata[data.data.tablefield[i]] = []
-              for (let j = 0; j < data.data.table.length; j++) {
-                that.nowtable.coldata[data.data.tablefield[i]].push(data.data.table[j][data.data.tablefield[i]])
+            that.oldfield = data.data.tablefield
+            if (!data.data.message) {
+              that.waringBox('请添加表格')
+            } else {
+              that.tablelist = data.data.tablename
+              that.nowtable = data.data
+              that.nowtable.coldata = {}
+              for (let i = 0; i < data.data.tablefield.length; i++) {
+                that.nowtable.coldata[data.data.tablefield[i]] = []
+                for (let j = 0; j < data.data.table.length; j++) {
+                  that.nowtable.coldata[data.data.tablefield[i]].push(data.data.table[j][data.data.tablefield[i]])
+                }
               }
             }
           }
@@ -111,9 +115,14 @@ export default {
           baseURL: baseurl
         })
         Axios.defaults.headers.common['token'] = cookieobj.user
+        Axios.defaults.headers.common['userid'] = cookieobj.login
         Axios.post('/findfile', {userid: cookieobj.login})
           .then(data => {
-            that.filelist = data.data
+            if (data.data.offline) {
+              that.exit()
+            } else {
+              that.filelist = data.data
+            }
           })
       }
     },
@@ -127,9 +136,14 @@ export default {
           baseURL: baseurl
         })
         Axios.defaults.headers.common['token'] = cookieobj.user
+        Axios.defaults.headers.common['userid'] = cookieobj.login
         Axios.post('/findfile', {userid: cookieobj.login})
           .then(data => {
-            that.filelist = data.data
+            if (data.data.offline) {
+              that.exit()
+            } else {
+              that.filelist = data.data
+            }
           })
       }
     },
@@ -166,10 +180,14 @@ export default {
         Axios.defaults.headers.common['userid'] = cookieobj.login
         Axios.post('/queryfile', {message})
           .then(data => {
-            if (data.data) {
-              that.getFile(data.data)
+            if (data.data.offline) {
+              that.exit()
             } else {
-              that.waringBox('服务器开小差了')
+              if (data.data) {
+                that.getFile(data.data)
+              } else {
+                that.waringBox('服务器开小差了')
+              }
             }
           })
       }
@@ -204,10 +222,14 @@ export default {
       if (!flag) {
         Axios.post('/typefile', {type})
           .then(data => {
-            if (data.data) {
-              that.getFile(data.data)
+            if (data.data.offline) {
+              that.exit()
             } else {
-              that.waringBox('服务器开小差了')
+              if (data.data) {
+                that.getFile(data.data)
+              } else {
+                that.waringBox('服务器开小差了')
+              }
             }
           })
       }
@@ -236,10 +258,14 @@ export default {
           fileid
         })
           .then(data => {
-            if (data.data) {
-              that.getFile()
+            if (data.data.offline) {
+              that.exit()
             } else {
-              that.waringBox('服务器开小差了')
+              if (data.data) {
+                that.getFile()
+              } else {
+                that.waringBox('服务器开小差了')
+              }
             }
           })
       }
@@ -266,8 +292,12 @@ export default {
       Axios.defaults.headers.common['token'] = cookieobj.user
       Axios.defaults.headers.common['userid'] = cookieobj.login
       Axios.post('/uploadfile', fileform)
-        .then(() => {
-          that.getFile()
+        .then((data) => {
+          if (data.data.offline) {
+            that.exit()
+          } else {
+            that.getFile()
+          }
         })
     },
     displayImg: function (e) {
@@ -346,16 +376,20 @@ export default {
       if (!flag) {
         Axios.post('/nowtabledata', {tablename})
           .then(data => {
-            that.nowtable = data.data
-            that.nowtable.coldata = {}
-            for (let i = 0; i < data.data.tablefield.length; i++) {
-              that.nowtable.coldata[data.data.tablefield[i]] = []
-              for (let j = 0; j < data.data.table.length; j++) {
-                that.nowtable.coldata[data.data.tablefield[i]].push(data.data.table[j][data.data.tablefield[i]])
+            if (data.data.offline) {
+              that.exit()
+            } else {
+              that.nowtable = data.data
+              that.nowtable.coldata = {}
+              for (let i = 0; i < data.data.tablefield.length; i++) {
+                that.nowtable.coldata[data.data.tablefield[i]] = []
+                for (let j = 0; j < data.data.table.length; j++) {
+                  that.nowtable.coldata[data.data.tablefield[i]].push(data.data.table[j][data.data.tablefield[i]])
+                }
               }
+              that.oldfield = data.data.tablefield
+              that.displayTable(true)
             }
-            that.oldfield = data.data.tablefield
-            that.displayTable(true)
           })
       }
     },
@@ -409,27 +443,29 @@ export default {
         if (!flag) {
           Axios.post('/nowtabledata', {tablename})
             .then(data => {
-              that.nowtable = data.data
-              that.nowtable.coldata = {}
-              for (let i = 0; i < data.data.tablefield.length; i++) {
-                that.nowtable.coldata[data.data.tablefield[i]] = []
-                for (let j = 0; j < data.data.table.length; j++) {
-                  that.nowtable.coldata[data.data.tablefield[i]].push(data.data.table[j][data.data.tablefield[i]])
+              if (data.data.offline) {
+                that.exit()
+              } else {
+                that.nowtable = data.data
+                that.nowtable.coldata = {}
+                for (let i = 0; i < data.data.tablefield.length; i++) {
+                  that.nowtable.coldata[data.data.tablefield[i]] = []
+                  for (let j = 0; j < data.data.table.length; j++) {
+                    that.nowtable.coldata[data.data.tablefield[i]].push(data.data.table[j][data.data.tablefield[i]])
+                  }
                 }
+                that.oldfield = data.data.tablefield
+                that.displayTable(true)
               }
-              that.oldfield = data.data.tablefield
-              that.displayTable(true)
             })
         }
       }
     }
   },
-  created: function () {
+  mounted: function () {
     this.olddate = new Date().getTime()
     this.getFile()
     this.getTable()
-  },
-  mounted: function () {
     document.getElementById('edittable').addEventListener('change', function (e) {
       e.target.className = 'changed'
     })

@@ -1,9 +1,9 @@
 <template>
   <div id="ppp">
-    <Nav @changepage="changePage" @changeadmin="cAdmin" @alluser="allUser" />
-    <Content :admin="admin" :adminflag="adminflag" :alluser="alluser" @changeaf="cAdminFlag" @displayimg="displayImg" @displayvideo="displayVideo" @waringbox="waringBox" />
-    <Img v-show="imghref" @closeImg="closeImg" :imghref="imghref" />
-    <Video v-show="videosrc" @closeVideo="closeVideo" :videosrc="videosrc" />
+    <Nav @Exit="exit" @changepage="changePage" @changeadmin="cAdmin" @alluser="allUser" />
+    <Content @Exit="exit" :admin="admin" :adminflag="adminflag" :alluser="alluser" @changeaf="cAdminFlag" @displayimg="displayImg" @displayvideo="displayVideo" @waringbox="waringBox" />
+    <Img v-show="imghref" @Exit="exit" @closeImg="closeImg" :imghref="imghref" />
+    <Video v-show="videosrc" @Exit="exit" @closeVideo="closeVideo" :videosrc="videosrc" />
     <Waringbox v-show="waring" :waringtext="waringtext" />
   </div>
 </template>
@@ -70,6 +70,9 @@ export default {
     },
     closeVideo: function () {
       this.videosrc = ''
+    },
+    exit: function () {
+      this.$emit('Exit')
     }
   },
   components: {

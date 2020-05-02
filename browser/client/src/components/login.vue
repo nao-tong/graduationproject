@@ -219,11 +219,15 @@ export default {
               user.init()
               login.init()
               clearInterval(that.timer)
-              that.$emit('changepage', 'personpage')
               axios.post('/user/loginflag', {
                 userid: Number(userid),
                 loginflag: 1
               })
+                .then(function (data) {
+                  if (data.data.useronline) {
+                    that.$emit('changepage', 'personpage')
+                  }
+                })
             }
           })
       } else {

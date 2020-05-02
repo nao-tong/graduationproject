@@ -142,7 +142,7 @@ user.post('/user/login', function (req, res) {
     })
 })
 
-//下线
+//修改在线状态
 user.post('/user/loginflag', function (req, res) {
   let userobj = {}
   userobj.login = req.body.loginflag
@@ -153,7 +153,11 @@ user.post('/user/loginflag', function (req, res) {
   }
   if (userobj.userid || userobj.userid == 0) {
     usertable.upDate(userobj, function () {
-      res.send({msg: '下线成功', useroffline: true})
+      if (userobj.login == 1) {
+        res.send({msg: '登录成功', useronline: true})
+      } else {
+        res.send({msg: '下线成功', useroffline: true})
+      }
     })
   }
 })
