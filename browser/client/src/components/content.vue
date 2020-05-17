@@ -29,7 +29,6 @@ export default {
       table: false,
       editor: false,
       editflag: false,
-      addtable: true,
       addeditflag: false,
       tablelist: [],
       nowtable: {},

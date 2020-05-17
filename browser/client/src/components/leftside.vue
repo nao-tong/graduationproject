@@ -21,7 +21,6 @@ export default {
   name: 'Leftside',
   data () {
     return {
-      oldtate: 0,
       flist: false,
       tlist: false,
       fheight: '',

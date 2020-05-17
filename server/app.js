@@ -46,11 +46,11 @@ app.use(function (req, res, next) {
         } else {
           if ((nowdate - Number(overtimeuser[userid])) > 3600000) {
             overtimeflag = true;
+            delete overtimeuser[userid];
           }
         }
         // 如果考验通过就next，否则就返回登陆信息不正确
         if (result == 'err' || overtimeflag) {
-          console.log(req.url, userid, overtimeflag, result, token)
             // 下线操作(前端完成)
           res.send({status: 403, msg: '身份信息已过期,请重新登录', offline: true});
         } else {

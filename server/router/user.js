@@ -6,11 +6,11 @@
  */
 
 //引入模块
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
+const express = require('express')
+const fs = require('fs')
+const path = require('path')
 const bodyParser = require('body-parser')
-const multer = require('multer');
+const multer = require('multer')
 const aes = require('../encAnddec/aes')
 const JwtUtil = require('../encapsulation/jwt')
 const usertable = require('../db/usertable')
@@ -142,26 +142,6 @@ user.post('/user/login', function (req, res) {
     })
 })
 
-//修改在线状态
-user.post('/user/loginflag', function (req, res) {
-  let userobj = {}
-  userobj.login = req.body.loginflag
-  if (typeof (req.body.userid) !== 'string') {
-    userobj.userid = req.body.userid
-  } else {
-    userobj.userid = aes.Decrypt(req.body.userid)
-  }
-  if (userobj.userid || userobj.userid == 0) {
-    usertable.upDate(userobj, function () {
-      if (userobj.login == 1) {
-        res.send({msg: '登录成功', useronline: true})
-      } else {
-        res.send({msg: '下线成功', useroffline: true})
-      }
-    })
-  }
-})
-
 /**
  * 注册
  */
@@ -186,7 +166,6 @@ user.get('/user/register/createId', function (req, res) {
 
 //头像上传(并发事件会导致污染变量，用数组、自加变量解决)
 user.post('/user/upload', upload.single('avatar'), function (req, res) {
-    console.log(req.file)
     let result = {};
     imgindex++;
     headimg = (req.file.destination + '/' + req.file.filename).replace('.', '');
@@ -379,6 +358,26 @@ user.post('/resetPassword', function (req, res) {
       result = true
       res.send(result)
     })
+})
+
+//修改在线状态
+user.post('/user/loginflag', function (req, res) {
+  let userobj = {}
+  userobj.login = req.body.loginflag
+  if (typeof (req.body.userid) !== 'string') {
+    userobj.userid = req.body.userid
+  } else {
+    userobj.userid = aes.Decrypt(req.body.userid)
+  }
+  if (userobj.userid || userobj.userid == 0) {
+    usertable.upDate(userobj, function () {
+      if (userobj.login == 1) {
+        res.send({msg: '登录成功', useronline: true})
+      } else {
+        res.send({msg: '下线成功', useroffline: true})
+      }
+    })
+  }
 })
 
 //文件上传
@@ -1218,8 +1217,6 @@ user.post('/addtable', function (req, res) {
                 //添加字段失败
             })
     }
-
-
 
 })
 

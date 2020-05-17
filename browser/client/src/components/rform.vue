@@ -54,7 +54,6 @@ export default {
   data () {
     return {
       svgtext: '',
-      img: '',
       imgindex: '',
       userid: '',
       nickname: '',

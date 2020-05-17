@@ -70,7 +70,7 @@
 import echarts from './../js/echarts'
 import axios from 'axios'
 export default {
-  name: 'Waringbox',
+  name: 'Displaytable',
   data () {
     return {
       olddate: 0,
